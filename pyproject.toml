@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "hyde"
+version = "1.0.0"
+description = "Hyde is a Call of Duty XAsset compiler."
+authors = ["Ethan C <EthanC@github.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+coloredlogs = "^14.0"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.4.4"
+black = "^19.10b0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
