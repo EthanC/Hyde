@@ -12,7 +12,7 @@ Hyde is intended for use with [Jekyll](https://github.com/EthanC/Jekyll), a Call
 
 -   [Python 3.8](https://www.python.org/downloads/)
 -   [coloredlogs](https://pypi.org/project/coloredlogs/)
--   [pillow](https://pillow.readthedocs.io/en/stable/installation.html)
+-   [Pillow](https://pillow.readthedocs.io/en/stable/installation.html)
 -   [FFmpeg](http://ffmpeg.org/download.html)
 
 ## Usage
