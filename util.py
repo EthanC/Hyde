@@ -1,13 +1,21 @@
 import csv
 import json
 import logging
+import shutil
+import subprocess
+from pathlib import Path
 from typing import Any, List, Optional, Union
+
+from PIL import Image
 
 log: logging.Logger = logging.getLogger(__name__)
 
 
 class Utility:
-    """Class containing utilitarian functions intended to reduce duplicate code."""
+    """
+    Class containing utilitarian functions intended to reduce duplicate
+    code.
+    """
 
     def ReadFile(
         self: Any, directory: str, filename: str, extension: str
@@ -22,6 +30,7 @@ class Utility:
                     return json.loads(file.read())
                 elif extension == "csv":
                     rows: List[List[str]] = []
+
                     for row in csv.reader(file):
                         rows.append(row)
 
@@ -37,6 +46,7 @@ class Utility:
         filename: str,
         extension: str,
         contents: Union[str, dict, list],
+        **kwargs,
     ) -> bool:
         """Write the contents of the specified file."""
 
@@ -45,7 +55,10 @@ class Utility:
                 f"{directory}{filename}.{extension}", "w+", encoding="utf-8"
             ) as file:
                 if extension == "json":
-                    file.write(json.dumps(contents, indent=4))
+                    if kwargs.get("compress") is True:
+                        file.write(json.dumps(contents, ensure_ascii=False))
+                    else:
+                        file.write(json.dumps(contents, indent=4, ensure_ascii=False))
                 else:
                     file.write(contents)
 
@@ -76,7 +89,9 @@ class Utility:
             return column
 
     def StripColors(self: Any, input: str) -> str:
-        """Remove all Call of Duty font color codes from the provided string."""
+        """
+        Remove all Call of Duty font color codes from the provided string.
+        """
 
         colors: List[str] = [
             "0",
@@ -110,3 +125,86 @@ class Utility:
         output: str = input.split(start)[1].split(end)[0]
 
         return output
+
+    def SortList(self: Any, array: List[dict], key: str) -> List[dict]:
+        """
+        Alphabetically sort the provided list of dicts by the specified key.
+        Null values are placed at the end of the list.
+        """
+
+        sort: List[dict] = sorted(array, key=lambda k: (k[key] is None, k[key]))
+
+        return sort
+
+    def CheckExists(self: Any, directory: str, filename: str, extension: str) -> bool:
+        """
+        Return a boolean value indicating whether or not the specified
+        file exists.
+        """
+
+        if Path(f"{directory}{filename}.{extension}").is_file():
+            return True
+
+        return False
+
+    def AnimateSprite(
+        self: Any,
+        directory: str,
+        filename: str,
+        extension: str,
+        itemType: str,
+        output: bool,
+    ) -> bool:
+        """Animate the provided Spritesheet into a WEBM video."""
+
+        if itemType == "Calling Card":
+            trueWidth: int = 512
+            trueHeight: int = 128
+        elif itemType == "Emblem":
+            trueWidth: int = 256
+            trueHeight: int = 256
+        else:
+            return False
+
+        with Image.open(f"{directory}/{filename}.{extension}") as file:
+            width, height = file.size
+
+            if (width == trueWidth) and (height == trueHeight):
+                return False
+
+            if output is True:
+                columns: int = width // trueWidth
+                rows: int = height // trueHeight
+
+                Path("tmp/").mkdir()
+
+                i: int = 1
+                for row in range(0, rows):
+                    for column in range(0, columns):
+                        frame = file.crop(
+                            (
+                                column * trueWidth,
+                                row * trueHeight,
+                                (column + 1) * trueWidth,
+                                (row + 1) * trueHeight,
+                            )
+                        )
+                        frame.save(f"tmp/{i:03}.png")
+                        i += 1
+
+                subprocess.call(
+                    [
+                        "ffmpeg",
+                        "-framerate",
+                        "10",
+                        "-i",
+                        "tmp/%03d.png",
+                        "-y",
+                        f"import/Modern Warfare/Images/{filename}.webm",
+                    ],
+                    stderr=subprocess.DEVNULL,
+                )
+
+                shutil.rmtree("tmp/")
+
+            return True
