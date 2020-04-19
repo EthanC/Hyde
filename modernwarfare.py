@@ -13,16 +13,24 @@ class ModernWarfare:
     
     Supported XAssets:
     - Accessories
+    - Battle Pass Items
     - Bundles
     - Calling Cards
     - Camos
     - Charms
+    - Consumables
     - Emblems
     - Finishing Moves
+    - Features
+    - Officer Challenges
     - Operator Quips
     - Operator Skins
+    - Special Items
     - Sprays
     - Stickers
+    - Vehicle Camos
+    - Weapons
+    - Weapon Unlock Challenges
     - Weekly Warzone Challenges
     - Weekly Multiplayer Challenges
     """
@@ -121,7 +129,7 @@ class ModernWarfare:
             "LM_",
             "BP_",
         ]
-        ends: List[str] = [" Flavor Text...", "_DESC"]
+        ends: List[str] = [" Flavor Text...", "_DESC", " NAME MISSING"]
 
         if value is None:
             return None
@@ -1143,6 +1151,42 @@ class ModernWarfare:
 
         if status is True:
             log.info(f"Compiled {count:,} Weapons")
+
+    def CompileWeaponUnlockChallenges(self: Any) -> None:
+        """
+        Compile the Weapon Unlock Challenge XAssets.
+
+        Requires gun_unlock_challenges.csv
+        """
+
+        ids: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "gun_unlock_challenges", "csv"
+        )
+
+        if ids is None:
+            return
+
+        challenges: List[dict] = []
+
+        for idRow in ids:
+            challenges.append(
+                {
+                    "id": Utility.GetColumn(self, idRow[0]),
+                    "name": ModernWarfare.GetLocalize(self, idRow[2]),
+                    "description": ModernWarfare.GetLocalize(self, idRow[3]).replace(
+                        "&&1", idRow[4]
+                    ),
+                    "amount": Utility.GetColumn(self, idRow[4]),
+                    "weaponId": Utility.GetColumn(self, idRow[6]),
+                }
+            )
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "weaponUnlockChallenges", "json", challenges
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(challenges):,} Weapon Unlock Challenges")
 
     def CompileWeeklyBRChallenges(self: Any) -> None:
         """

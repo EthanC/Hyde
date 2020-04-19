@@ -54,6 +54,7 @@ class Hyde:
         ModernWarfare.CompileStickers(self)
         ModernWarfare.CompileVehicleCamos(self)
         ModernWarfare.CompileWeapons(self)
+        ModernWarfare.CompileWeaponUnlockChallenges(self)
         ModernWarfare.CompileWeeklyBRChallenges(self)
         ModernWarfare.CompileWeeklyMPChallenges(self)
         ModernWarfare.CompileDatabase(self, False)

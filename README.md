@@ -47,6 +47,7 @@ python hyde.py
 -   Stickers
 -   Vehicle Camos
 -   Weapons
+-   Weapon Unlock Challenges
 -   Weekly Warzone Challenges
 -   Weekly Multiplayer Challenges
 
