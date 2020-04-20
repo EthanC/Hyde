@@ -23,6 +23,7 @@ class ModernWarfare:
     - Finishing Moves
     - Features
     - Officer Challenges
+    - Operators
     - Operator Quips
     - Operator Skins
     - Special Items
@@ -48,6 +49,9 @@ class ModernWarfare:
         )
         self.lootMaster: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "loot_master", "csv"
+        )
+        self.operatorIds: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "operator_ids", "csv"
         )
 
     def GetLootType(self: Any, value: int) -> Optional[str]:
@@ -93,6 +97,21 @@ class ModernWarfare:
         # Example: icon_season_s02
 
         return ModernWarfare.GetLocalize(self, f"SEASONS/SEASON_{round(value / 1000)}")
+
+    def GetOperatorID(self: Any, key: str) -> Optional[Union[str, int]]:
+        """
+        Return the ID for the requested Operator.
+
+        Requires operator_ids.csv
+        """
+
+        for operator in self.operatorIds:
+            if Utility.GetColumn(self, operator[1]) == key:
+                return Utility.GetColumn(self, operator[0])
+            # Universal Operator items do not have an ID, so we'll just
+            # set one ourselves.
+            elif key == "universal_ref":
+                return 29999
 
     def GetLocalize(self: Any, key: str) -> Optional[str]:
         """
@@ -591,39 +610,12 @@ class ModernWarfare:
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                     "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
                     "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
-                    "operatorId": None,  # This is determined later
-                    "operator": Utility.GetColumn(self, tableRow[2]),
+                    "operatorId": ModernWarfare.GetOperatorID(self, tableRow[2]),
                     "image": Utility.GetColumn(self, tableRow[17]),
                     "background": "ui_loot_bg_execution",
                     "video": Utility.GetColumn(self, tableRow[11]),
                 }
             )
-
-        # TODO: Find a better way to determine the Operator ID
-        table: self.csv = Utility.ReadFile(
-            self, "import/Modern Warfare/", "operators", "csv"
-        )
-
-        if table is not None:
-            for execution in executions:
-                if execution.get("operator") is None:
-                    continue
-
-                if execution.get("operator") == "universal_ref":
-                    execution["operator"] = "Universal"
-
-                    continue
-
-                for tableRow in table:
-                    if Utility.GetColumn(self, tableRow[1]) == execution.get(
-                        "operator"
-                    ):
-                        execution["operatorId"] = Utility.GetColumn(self, tableRow[0])
-
-                        if (
-                            name := ModernWarfare.GetLocalize(self, tableRow[2])
-                        ) is not None:
-                            execution["operator"] = name.capitalize()
 
         status: bool = Utility.WriteFile(
             self, "export/Modern Warfare/", "executions", "json", executions
@@ -716,6 +708,188 @@ class ModernWarfare:
         if status is True:
             log.info(f"Compiled {len(challenges):,} Officer Challenges")
 
+    def CompileOperators(self: Any) -> None:
+        """
+        Compile the Operator XAssets.
+
+        Requires operator_ids.csv, operators.csv, cp_intel_billets.csv,
+        and factiontable.csv.
+        """
+
+        ids: self.csv = self.operatorIds
+        table: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "operators", "csv"
+        )
+
+        if (ids is None) or (table is None):
+            return
+
+        operators: List[dict] = []
+
+        for idRow, tableRow in zip(ids, table):
+            idColumn: self.csvColumn = Utility.GetColumn(self, idRow[1])
+            tableColumn: self.csvColumn = Utility.GetColumn(self, tableRow[1])
+
+            if idColumn != tableColumn:
+                tableRow: self.csvRow = Utility.GetRow(self, str(idColumn), table, 1)
+
+                if tableRow is None:
+                    log.warning(
+                        f"Mismatch in operator_ids.csv, {idColumn} does not exist in operators.csv ({tableColumn})"
+                    )
+
+                    continue
+
+            operators.append(
+                {
+                    "id": Utility.GetColumn(self, idRow[0]),
+                    "alternateId": Utility.GetColumn(self, tableRow[0]),
+                    "name": ModernWarfare.GetLocalize(self, tableRow[2]).title(),
+                    "description": ModernWarfare.GetLocalize(self, tableRow[16]),
+                    "type": ModernWarfare.GetLootType(self, int(idRow[0])),
+                    "faction": None, # This is determined later
+                    "branch": Utility.GetColumn(self, tableRow[4]),
+                    "factionImage": Utility.GetColumn(self, tableRow[9]),
+                    "image": Utility.GetColumn(self, tableRow[21]),
+                    "background": "ui_loot_bg_operator",
+                    "video": Utility.GetColumn(self, tableRow[20]),
+                    "billets": [
+                        {
+                            "label": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/CITIZENSHIP"
+                            ),
+                            "value": ModernWarfare.GetLocalize(self, tableRow[13]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/FIRST_LANGUAGE"
+                            ),
+                            "value": ModernWarfare.GetLocalize(self, tableRow[14]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "LUA_MENU/STATUS"),
+                            "value": ModernWarfare.GetLocalize(self, tableRow[15]),
+                        },
+                    ],
+                }
+            )
+
+        billets: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "cp_intel_billets", "csv"
+        )
+
+        if billets is not None:
+            for billetRow in billets:
+                for operator in operators:
+                    if Utility.GetColumn(self, billetRow[0]) != operator.get("alternateId"):
+                        continue
+
+                    extra: List[dict] = [
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_NAME_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[8]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_CODENAME_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[9]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_ALIASES_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[10]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_DOB_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[12]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_GENDER_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[13]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_NATIONALITY_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[11]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_LATERALITY_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[14]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_HEIGHT_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[15]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_WEIGHT_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[16]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_VISION_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[17]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_BLOOD_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[18]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_RELATIVES_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[21]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_MARITALSTATUS_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[23]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_EYECOLOR_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[19]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_HAIR_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[20]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_LANGUAGES_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[22]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_CHILDERN_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[24]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_SPECIALIST_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[25]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_HISTORY_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[26]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_ASSOCIATIONS_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[27]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_DIRECTIVE_TITLE"),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[28]),
+                        },
+                    ]
+
+                    operator["billets"].extend(extra)
+
+        factions: self.csv = Utility.ReadFile(self, "import/Modern Warfare/", "factiontable", "csv")
+
+        for operator in operators:
+            for factionRow in factions:
+                if operator.get("branch") != Utility.GetColumn(self, factionRow[0]):
+                    continue
+
+                operator["faction"] = ModernWarfare.GetLocalize(self, factionRow[14])
+                operator["branch"] = ModernWarfare.GetLocalize(self, factionRow[1])
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "operators", "json", operators
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(operators):,} Operators")
+
     def CompileQuips(self: Any) -> None:
         """
         Compile the Operator Quip XAssets.
@@ -758,7 +932,7 @@ class ModernWarfare:
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                     "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
                     "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
-                    # TODO: Determine Operator ID.
+                    "operatorId": ModernWarfare.GetOperatorID(self, tableRow[2]),
                     "image": Utility.GetColumn(self, tableRow[4]),
                     "background": "ui_loot_bg_operator",
                 }
@@ -813,31 +987,11 @@ class ModernWarfare:
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                     "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
                     "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
-                    "operatorId": None,  # This is determined later
-                    "operator": Utility.GetColumn(self, tableRow[2]),
+                    "operatorId": ModernWarfare.GetOperatorID(self, tableRow[2]),
                     "image": Utility.GetColumn(self, tableRow[18]),
                     "background": "ui_loot_bg_operator",
                 }
             )
-
-        # TODO: Find a better way to determine Operator ID.
-        table: self.csv = Utility.ReadFile(
-            self, "import/Modern Warfare/", "operators", "csv"
-        )
-
-        if table is not None:
-            for skin in skins:
-                if skin.get("operator") is None:
-                    continue
-
-                for tableRow in table:
-                    if Utility.GetColumn(self, tableRow[1]) == skin.get("operator"):
-                        skin["operatorId"] = Utility.GetColumn(self, tableRow[0])
-
-                        if (
-                            name := ModernWarfare.GetLocalize(self, tableRow[2])
-                        ) is not None:
-                            skin["operator"] = name.capitalize()
 
         status: bool = Utility.WriteFile(
             self, "export/Modern Warfare/", "skins", "json", skins
@@ -1307,6 +1461,7 @@ class ModernWarfare:
         dbLoot: List[dict] = []
         dbBundles: List[dict] = []
         dbWeapons: List[dict] = []
+        dbOperators: List[dict] = []
         dbImages: List[str] = []
 
         include: List[str] = [
@@ -1367,6 +1522,8 @@ class ModernWarfare:
                     outputImages,
                 )
 
+                item["slug"] = Utility.Sluggify(self, item.get("name"))
+
                 dbLoot.append(item)
 
         bundles: self.json = Utility.ReadFile(
@@ -1406,6 +1563,8 @@ class ModernWarfare:
                 items.append(item.get("id"))
 
             bundle["items"] = items
+
+            bundle["slug"] = Utility.Sluggify(self, bundle.get("name"))
 
             dbBundles.append(bundle)
 
@@ -1450,12 +1609,53 @@ class ModernWarfare:
                 ):
                     continue
 
+                variant["slug"] = Utility.Sluggify(self, variant.get("name"))
+
                 dbLoot.append(variant)
                 variants.append(variant.get("id"))
 
             weapons[weapon]["variants"] = variants
 
+            weapons[weapon]["slug"] = Utility.Sluggify(self, weapons[weapon].get("name"))
+
             dbWeapons.append(weapons[weapon])
+
+        operators: self.json = Utility.ReadFile(
+            self, "export/Modern Warfare/", "operators", "json"
+        )
+
+        for operator in operators:
+            if operator.get("name") is None:
+                continue
+
+            if (image := operator.get("image")) is None:
+                continue
+
+            dbImages.append(image)
+
+            # Setup the item id arrays
+            operator["skins"] = []
+            operator["executions"] = []
+            operator["quips"] = []
+
+            for item in dbLoot:
+                itemType: Optional[str] = item.get("type")
+
+                # Operator-specific item types
+                if itemType not in ["Operator Skin", "Finishing Move", "Operator Quip"]:
+                    continue
+
+                if ((opId := item.get("operatorId")) == operator.get("id")) or (opId == 29999):
+                    if itemType == "Operator Skin":
+                        operator["skins"].append(item.get("id"))
+                    elif itemType == "Finishing Move":
+                        operator["executions"].append(item.get("id"))
+                    elif itemType == "Operator Quip":
+                        operator["quips"].append(item.get("id"))
+
+            operator["slug"] = Utility.Sluggify(self, operator.get("name"))
+            
+            dbOperators.append(operator)
 
         Utility.WriteFile(
             self,
@@ -1463,7 +1663,7 @@ class ModernWarfare:
             "loot",
             "json",
             Utility.SortList(self, dbLoot, "name"),
-            compress=False,
+            compress=True,
         )
 
         Utility.WriteFile(
@@ -1472,7 +1672,7 @@ class ModernWarfare:
             "bundles",
             "json",
             Utility.SortList(self, dbBundles, "name"),
-            compress=False,
+            compress=True,
         )
 
         Utility.WriteFile(
@@ -1481,7 +1681,16 @@ class ModernWarfare:
             "weapons",
             "json",
             Utility.SortList(self, dbWeapons, "name"),
-            compress=False,
+            compress=True,
+        )
+
+        Utility.WriteFile(
+            self,
+            "export/Modern Warfare/DB/",
+            "operators",
+            "json",
+            Utility.SortList(self, dbOperators, "name"),
+            compress=True,
         )
 
         Utility.WriteFile(
@@ -1492,5 +1701,5 @@ class ModernWarfare:
             ",".join(list(set(dbImages))),
         )
 
-        count: int = len(dbLoot) + len(dbWeapons) + len(dbBundles)
+        count: int = len(dbLoot) + len(dbWeapons) + len(dbBundles) + len(dbOperators)
         log.info(f"Compiled {count:,} Database Items")

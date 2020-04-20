@@ -40,6 +40,7 @@ python hyde.py
 -   Finishing Moves
 -   Features
 -   Officer Challenges
+-   Operators
 -   Operator Quips
 -   Operator Skins
 -   Special Items

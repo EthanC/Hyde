@@ -28,7 +28,7 @@ class Hyde:
 
         directories: List[Path] = [
             Path("import/Modern Warfare"),
-            Path("export/Modern Warfare/DB"),
+            Path("export/Modern Warfare/DB/Videos"),
         ]
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
@@ -47,6 +47,7 @@ class Hyde:
         ModernWarfare.CompileExecutions(self)
         ModernWarfare.CompileFeatures(self)
         ModernWarfare.CompileOfficerChallenges(self)
+        ModernWarfare.CompileOperators(self)
         ModernWarfare.CompileQuips(self)
         ModernWarfare.CompileSkins(self)
         ModernWarfare.CompileSpecialItems(self)

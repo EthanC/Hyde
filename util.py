@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -200,7 +201,7 @@ class Utility:
                         "-i",
                         "tmp/%03d.png",
                         "-y",
-                        f"import/Modern Warfare/Images/{filename}.webm",
+                        f"export/Modern Warfare/DB/Videos/{filename}.webm",
                     ],
                     stderr=subprocess.DEVNULL,
                 )
@@ -208,3 +209,23 @@ class Utility:
                 shutil.rmtree("tmp/")
 
             return True
+
+    def Sluggify(self: Any, input: str) -> str:
+        """ToDo"""
+
+        # Compile regex patterns
+        invalids: re.Pattern[str] = re.compile(r"[^a-z0-9\s-]")
+        hypens: re.Pattern[str] = re.compile(r"\s")
+        doubleHypens: re.Pattern[str] = re.compile(r"-{2,}")
+
+        # Remove invalid characters, lowercase string
+        output: str = re.sub(invalids, "", input.lower())
+
+        # Replace spaces with hypens
+        output: str = re.sub(hypens, "-", output)
+
+        # Replace double hyphens with single hyphens
+        output: str = re.sub(doubleHypens, "-", output)
+
+        # Truncate slug to 45 characters
+        return output[:45]
