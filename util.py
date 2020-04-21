@@ -191,6 +191,10 @@ class Utility:
                             )
                         )
                         frame.save(f"tmp/{i:03}.png")
+
+                        if i == 1:
+                            frame.save(f"export/Modern Warfare/Images/{filename}.png")
+
                         i += 1
 
                 subprocess.call(

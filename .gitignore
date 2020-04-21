@@ -145,6 +145,7 @@ import/
 
 # Output
 export/
+tmp/
 
 # Miscellaneous
 ffmpeg.exe

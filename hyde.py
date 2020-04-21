@@ -27,7 +27,9 @@ class Hyde:
             pass
 
         directories: List[Path] = [
-            Path("import/Modern Warfare"),
+            Path("import/Modern Warfare/Images"),
+            Path("import/Modern Warfare/Videos"),
+            Path("export/Modern Warfare/DB/Images"),
             Path("export/Modern Warfare/DB/Videos"),
         ]
         for directory in directories:
@@ -46,6 +48,7 @@ class Hyde:
         ModernWarfare.CompileEmblems(self)
         ModernWarfare.CompileExecutions(self)
         ModernWarfare.CompileFeatures(self)
+        ModernWarfare.CompileGestures(self)
         ModernWarfare.CompileOfficerChallenges(self)
         ModernWarfare.CompileOperators(self)
         ModernWarfare.CompileQuips(self)

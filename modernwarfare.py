@@ -147,8 +147,9 @@ class ModernWarfare:
             "ME_",
             "LM_",
             "BP_",
+            "UNIVERSAL_",
         ]
-        ends: List[str] = [" Flavor Text...", "_DESC", " NAME MISSING"]
+        ends: List[str] = [" Flavor Text...", "_DESC", " NAME MISSING", "_1", "_2"]
 
         if value is None:
             return None
@@ -297,7 +298,9 @@ class ModernWarfare:
                     "season": ModernWarfare.GetLootSeason(self, int(idRow[4])),
                     "billboard": Utility.GetColumn(self, idRow[6]),
                     "logo": Utility.GetColumn(self, idRow[8]),
-                    "price": Utility.GetColumn(self, idRow[10]),
+                    "price": None
+                    if (price := Utility.GetColumn(self, idRow[10])) == 10000
+                    else price,
                     "items": items,
                 }
             )
@@ -660,6 +663,58 @@ class ModernWarfare:
         if status is True:
             log.info(f"Compiled {len(features):,} Features")
 
+    def CompileGestures(self: Any) -> None:
+        """
+        Compile the Gesture XAssets.
+        
+        Requires gestures_ids.csv and gesturetable.csv
+        """
+
+        ids: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "gestures_ids", "csv"
+        )
+        table: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "gesturetable", "csv"
+        )
+
+        if (ids is None) or (table is None):
+            return
+
+        gestures: List[dict] = []
+
+        for idRow, tableRow in zip(ids, table):
+            idColumn: self.csvColumn = Utility.GetColumn(self, idRow[1])
+            tableColumn: self.csvColumn = Utility.GetColumn(self, tableRow[0])
+
+            if idColumn != tableColumn:
+                tableRow: self.csvRow = Utility.GetRow(self, str(idColumn), table, 0)
+
+                if tableRow is None:
+                    log.info(
+                        f"Mismatch in gestures_ids.csv, {idColumn} does not exist in gesturetable.csv ({tableColumn})"
+                    )
+
+                    continue
+
+            gestures.append(
+                {
+                    "id": Utility.GetColumn(self, idRow[0]),
+                    "name": ModernWarfare.GetLocalize(self, tableRow[2]),
+                    "type": ModernWarfare.GetLootType(self, int(idRow[0])),
+                    "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
+                    "season": ModernWarfare.GetLootSeason(self, int(idRow[3])),
+                    "image": Utility.GetColumn(self, tableRow[12]),
+                    "background": "ui_loot_bg_gesture",
+                }
+            )
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "gestures", "json", gestures
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(gestures):,} Gestures")
+
     def CompileOfficerChallenges(self: Any) -> None:
         """
         Compile the Officer Challenge XAssets.
@@ -747,11 +802,14 @@ class ModernWarfare:
                     "name": ModernWarfare.GetLocalize(self, tableRow[2]).title(),
                     "description": ModernWarfare.GetLocalize(self, tableRow[16]),
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
-                    "faction": None, # This is determined later
+                    "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
+                    "season": ModernWarfare.GetLootSeason(
+                        self, int(int(idRow[5]) * 1000)
+                    ),
+                    "faction": Utility.GetColumn(self, tableRow[3]),
                     "branch": Utility.GetColumn(self, tableRow[4]),
-                    "factionImage": Utility.GetColumn(self, tableRow[9]),
-                    "image": Utility.GetColumn(self, tableRow[21]),
-                    "background": "ui_loot_bg_operator",
+                    "branchIcon": Utility.GetColumn(self, tableRow[9]),
+                    "image": Utility.GetColumn(self, tableRow[7]),
                     "video": Utility.GetColumn(self, tableRow[20]),
                     "billets": [
                         {
@@ -781,106 +839,162 @@ class ModernWarfare:
         if billets is not None:
             for billetRow in billets:
                 for operator in operators:
-                    if Utility.GetColumn(self, billetRow[0]) != operator.get("alternateId"):
+                    if Utility.GetColumn(self, billetRow[0]) != operator.get(
+                        "alternateId"
+                    ):
                         continue
 
                     extra: List[dict] = [
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_NAME_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_NAME_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[8]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_CODENAME_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_CODENAME_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[9]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_ALIASES_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_ALIASES_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[10]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_DOB_TITLE"),
-                            "value": ModernWarfare.GetLocalize(self, billetRow[12]),
-                        },
-                        {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_GENDER_TITLE"),
-                            "value": ModernWarfare.GetLocalize(self, billetRow[13]),
-                        },
-                        {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_NATIONALITY_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_NATIONALITY_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[11]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_LATERALITY_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_DOB_TITLE"
+                            ),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[12]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_GENDER_TITLE"
+                            ),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[13]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_LATERALITY_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[14]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_HEIGHT_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_HEIGHT_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[15]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_WEIGHT_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_WEIGHT_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[16]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_VISION_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_VISION_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[17]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_BLOOD_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_BLOOD_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[18]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_RELATIVES_TITLE"),
-                            "value": ModernWarfare.GetLocalize(self, billetRow[21]),
-                        },
-                        {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_MARITALSTATUS_TITLE"),
-                            "value": ModernWarfare.GetLocalize(self, billetRow[23]),
-                        },
-                        {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_EYECOLOR_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_EYECOLOR_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[19]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_HAIR_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_HAIR_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[20]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_LANGUAGES_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_RELATIVES_TITLE"
+                            ),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[21]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_LANGUAGES_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[22]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_CHILDERN_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_MARITALSTATUS_TITLE"
+                            ),
+                            "value": ModernWarfare.GetLocalize(self, billetRow[23]),
+                        },
+                        {
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_CHILDERN_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[24]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_SPECIALIST_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_SPECIALIST_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[25]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_HISTORY_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_HISTORY_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[26]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_ASSOCIATIONS_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_ASSOCIATIONS_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[27]),
                         },
                         {
-                            "label": ModernWarfare.GetLocalize(self, "CP_INTEL/BILLET_DIRECTIVE_TITLE"),
+                            "label": ModernWarfare.GetLocalize(
+                                self, "CP_INTEL/BILLET_DIRECTIVE_TITLE"
+                            ),
                             "value": ModernWarfare.GetLocalize(self, billetRow[28]),
                         },
                     ]
 
                     operator["billets"].extend(extra)
 
-        factions: self.csv = Utility.ReadFile(self, "import/Modern Warfare/", "factiontable", "csv")
+        factions: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "factiontable", "csv"
+        )
 
         for operator in operators:
             for factionRow in factions:
                 if operator.get("branch") != Utility.GetColumn(self, factionRow[0]):
                     continue
 
-                operator["faction"] = ModernWarfare.GetLocalize(self, factionRow[14])
+                if (faction := operator.get("faction")) == 1:
+                    operator["faction"] = ModernWarfare.GetLocalize(
+                        self, "LUA_MENU/THE_EAST"
+                    )
+                elif faction == 0:
+                    operator["faction"] = ModernWarfare.GetLocalize(
+                        self, "LUA_MENU/THE_WEST"
+                    )
+                else:
+                    operator["faction"] = None
+
                 operator["branch"] = ModernWarfare.GetLocalize(self, factionRow[1])
 
         status: bool = Utility.WriteFile(
@@ -1466,7 +1580,7 @@ class ModernWarfare:
 
         include: List[str] = [
             "accessories.json",
-            "battlePasses.json",
+            "battlePassItems.json",
             "callingCards.json",
             "camos.json",
             "charms.json",
@@ -1474,6 +1588,7 @@ class ModernWarfare:
             "emblems.json",
             "executions.json",
             "features.json",
+            "gestures.json",
             "quips.json",
             "skins.json",
             "specialItems.json",
@@ -1490,18 +1605,13 @@ class ModernWarfare:
                 self, "export/Modern Warfare/", filename.split(".")[0], "json"
             )
 
-            if loot is None:
-                log.error(f"{filename} not found in /export/Modern Warfare/")
-
-                continue
-
             for item in loot:
                 if item.get("name") is None:
                     continue
 
                 if (image := item.get("image")) is None:
                     continue
-
+                
                 dbImages.append(image)
 
                 if (
@@ -1616,7 +1726,9 @@ class ModernWarfare:
 
             weapons[weapon]["variants"] = variants
 
-            weapons[weapon]["slug"] = Utility.Sluggify(self, weapons[weapon].get("name"))
+            weapons[weapon]["slug"] = Utility.Sluggify(
+                self, weapons[weapon].get("name")
+            )
 
             dbWeapons.append(weapons[weapon])
 
@@ -1629,6 +1741,12 @@ class ModernWarfare:
                 continue
 
             if (image := operator.get("image")) is None:
+                continue
+
+            if (
+                Utility.CheckExists(self, "import/Modern Warfare/Images/", image, "png")
+                is False
+            ):
                 continue
 
             dbImages.append(image)
@@ -1645,7 +1763,10 @@ class ModernWarfare:
                 if itemType not in ["Operator Skin", "Finishing Move", "Operator Quip"]:
                     continue
 
-                if ((opId := item.get("operatorId")) == operator.get("id")) or (opId == 29999):
+                # 29999 is the Universal Operator ID that we manually set
+                if ((opId := item.get("operatorId")) == operator.get("id")) or (
+                    opId == 29999
+                ):
                     if itemType == "Operator Skin":
                         operator["skins"].append(item.get("id"))
                     elif itemType == "Finishing Move":
@@ -1654,7 +1775,7 @@ class ModernWarfare:
                         operator["quips"].append(item.get("id"))
 
             operator["slug"] = Utility.Sluggify(self, operator.get("name"))
-            
+
             dbOperators.append(operator)
 
         Utility.WriteFile(
