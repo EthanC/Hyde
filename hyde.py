@@ -1,5 +1,4 @@
 import logging
-import shutil
 from pathlib import Path
 from sys import exit
 from typing import Any, List
@@ -21,11 +20,6 @@ class Hyde:
         print("Hyde: Call of Duty XAsset Compiler")
         print("https://github.com/EthanC/Hyde\n")
 
-        try:
-            shutil.rmtree("export/Modern Warfare")
-        except Exception:
-            pass
-
         directories: List[Path] = [
             Path("import/Modern Warfare/Images"),
             Path("import/Modern Warfare/Videos"),
@@ -39,6 +33,7 @@ class Hyde:
         log.info("Compiling Call of Duty: Modern Warfare XAssets...")
         ModernWarfare.__init__(self)
         ModernWarfare.CompileAccessories(self)
+        ModernWarfare.CompileBattlePasses(self)
         ModernWarfare.CompileBattlePassItems(self)
         ModernWarfare.CompileBundles(self)
         ModernWarfare.CompileCallingCards(self)

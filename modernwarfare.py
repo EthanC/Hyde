@@ -9,10 +9,11 @@ log: logging.Logger = logging.getLogger(__name__)
 
 class ModernWarfare:
     """
-    Call of Duty: Modern Warfare (2019)
+    Call of Duty: Modern Warfare
     
     Supported XAssets:
     - Accessories
+    - Battle Passes
     - Battle Pass Items
     - Bundles
     - Calling Cards
@@ -223,6 +224,62 @@ class ModernWarfare:
         if status is True:
             log.info(f"Compiled {len(accessories):,} Accessories")
 
+    def CompileBattlePasses(self: Any) -> None:
+        """
+        Compile the Battle Pass XAssets.
+        
+        Requires battlepass_season.csv for each desired Season.
+        """
+
+        battlePasses: List[dict] = []
+
+        for file in glob("import/Modern Warfare/*.csv"):
+            filename: str = file.rsplit("\\")[1].split(".")[0]
+
+            if filename.startswith("battlepass_season") is False:
+                continue
+
+            ids: self.csv = Utility.ReadFile(
+                self, "import/Modern Warfare/", filename, "csv"
+            )
+
+            if ids is None:
+                continue
+
+            battlePass = {
+                "name": ModernWarfare.GetLootSeason(
+                    self, (int(filename.split("season")[1]) * 1000)
+                ),
+                "items": [],
+            }
+
+            for idRow in ids:
+                items: List[str] = idRow[2].split("|")
+                billboards: List[str] = idRow[8].split("|")
+
+                for item, billboard in zip(items, billboards):
+                    battlePass["items"].append(
+                        {
+                            "id": int(item),
+                            "type": ModernWarfare.GetLootType(self, int(item)),
+                            "tier": Utility.GetColumn(self, idRow[0]),
+                            "free": bool(Utility.GetColumn(self, idRow[3])),
+                            "codPoints": None
+                            if (amount := Utility.GetColumn(self, idRow[6])) == 0
+                            else amount,
+                            "billboard": billboard,
+                        }
+                    )
+
+            battlePasses.append(battlePass)
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "battlePasses", "json", battlePasses
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(battlePasses):,} Battle Passes")
+
     def CompileBattlePassItems(self: Any) -> None:
         """
         Compile the Battle Pass Item XAssets.
@@ -296,8 +353,12 @@ class ModernWarfare:
                     "flavor": ModernWarfare.GetLocalize(self, idRow[3]),
                     "type": ModernWarfare.GetLocalize(self, idRow[5]),
                     "season": ModernWarfare.GetLootSeason(self, int(idRow[4])),
-                    "billboard": Utility.GetColumn(self, idRow[6]),
-                    "logo": Utility.GetColumn(self, idRow[8]),
+                    "billboard": None
+                    if (img := Utility.GetColumn(self, idRow[6])) == "placeholder_x"
+                    else img,
+                    "logo": None
+                    if (img := Utility.GetColumn(self, idRow[8])) == "placeholder_x"
+                    else img,
                     "price": None
                     if (price := Utility.GetColumn(self, idRow[10])) == 10000
                     else price,
@@ -506,7 +567,9 @@ class ModernWarfare:
                     "description": ModernWarfare.GetLocalize(self, idRow[11]),
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                     "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
-                    "image": Utility.GetColumn(self, idRow[9]),
+                    "image": None
+                    if (img := Utility.GetColumn(self, idRow[9])) == "placeholder_x"
+                    else img,
                     "background": "ui_loot_bg_generic",
                 }
             )
@@ -1370,7 +1433,6 @@ class ModernWarfare:
                         "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
                         "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
                         "baseId": weapons[w]["id"],
-                        "base": Utility.GetColumn(self, idRow[1]),
                         "image": None,  # This is determined later
                     }
                 )
@@ -1565,10 +1627,11 @@ class ModernWarfare:
 
         https://cod.tracker.gg/modern-warfare/db/loot
         
-        Requires accessories.json, battlePasses.json, callingCards.json, camos.json,
-        charms.json, consumables.json, emblems.json, executions.json, quips.json,
-        skins.json, specials.json, sprays.json, stickers.json, vehicleCamos.json,
-        and weapons.json
+        Requires accessories.json, battlePasses.json, battlePassItems.json,
+        bundles.json, callingCards.json, camos.json, charms.json, consumables.json,
+        emblems.json, executions.json, features.json, gestures.json, operators.json,
+        quips.json, skins.json, specialItems.json, sprays.json, stickers.json,
+        vehicleCamos.json, and weapons.json
         """
 
         # Database output files
@@ -1576,6 +1639,7 @@ class ModernWarfare:
         dbBundles: List[dict] = []
         dbWeapons: List[dict] = []
         dbOperators: List[dict] = []
+        dbBattlePasses: List[dict] = []
         dbImages: List[str] = []
 
         include: List[str] = [
@@ -1611,7 +1675,7 @@ class ModernWarfare:
 
                 if (image := item.get("image")) is None:
                     continue
-                
+
                 dbImages.append(image)
 
                 if (
@@ -1640,74 +1704,61 @@ class ModernWarfare:
             self, "export/Modern Warfare/", "bundles", "json"
         )
 
-        for bundle in bundles:
-            if bundle.get("name") is None:
-                continue
+        if bundles is not None:
+            for bundle in bundles:
+                if bundle.get("name") is None:
+                    continue
 
-            if (billboard := bundle.get("billboard")) is None:
-                continue
+                if (billboard := bundle.get("billboard")) is None:
+                    continue
 
-            if (logo := bundle.get("logo")) is None:
-                continue
+                if (logo := bundle.get("logo")) is None:
+                    continue
 
-            dbImages.append(billboard)
-            dbImages.append(logo)
+                dbImages.append(billboard)
+                dbImages.append(logo)
 
-            if (
-                Utility.CheckExists(
-                    self, "import/Modern Warfare/Images/", billboard, "png"
-                )
-                is False
-            ):
-                continue
+                if (
+                    Utility.CheckExists(
+                        self, "import/Modern Warfare/Images/", billboard, "png"
+                    )
+                    is False
+                ):
+                    continue
 
-            if (
-                Utility.CheckExists(self, "import/Modern Warfare/Images/", logo, "png")
-                is False
-            ):
-                continue
+                if (
+                    Utility.CheckExists(
+                        self, "import/Modern Warfare/Images/", logo, "png"
+                    )
+                    is False
+                ):
+                    continue
 
-            items: List[int] = []
+                items: List[int] = []
 
-            for item in bundle.get("items", []):
-                items.append(item.get("id"))
+                for item in bundle.get("items", []):
+                    items.append(item.get("id"))
 
-            bundle["items"] = items
+                bundle["items"] = items
 
-            bundle["slug"] = Utility.Sluggify(self, bundle.get("name"))
+                bundle["slug"] = Utility.Sluggify(self, bundle.get("name"))
 
-            dbBundles.append(bundle)
+                dbBundles.append(bundle)
 
         weapons: self.json = Utility.ReadFile(
             self, "export/Modern Warfare/", "weapons", "json"
         )
 
-        for weapon in weapons:
-            if weapons[weapon].get("name") is None:
-                continue
-
-            if (image := weapons[weapon].get("image")) is None:
-                continue
-
-            if (icon := weapons[weapon].get("icon")) is not None:
-                dbImages.append(icon)
-
-            dbImages.append(image)
-
-            if (
-                Utility.CheckExists(self, "import/Modern Warfare/Images/", image, "png")
-                is False
-            ):
-                continue
-
-            variants: List[int] = []
-
-            for variant in weapons[weapon]["variants"]:
-                if variant.get("name") is None:
+        if weapons is not None:
+            for weapon in weapons:
+                if weapons[weapon].get("name") is None:
                     continue
 
-                if (image := variant.get("image")) is None:
+                if (image := weapons[weapon].get("image")) is None:
                     continue
+
+                if (icon := weapons[weapon].get("icon")) is not None:
+                    dbImages.append(icon)
 
                 dbImages.append(image)
 
@@ -1719,64 +1770,108 @@ class ModernWarfare:
                 ):
                     continue
 
-                variant["slug"] = Utility.Sluggify(self, variant.get("name"))
+                variants: List[int] = []
 
-                dbLoot.append(variant)
-                variants.append(variant.get("id"))
+                for variant in weapons[weapon]["variants"]:
+                    if variant.get("name") is None:
+                        continue
 
-            weapons[weapon]["variants"] = variants
+                    if (image := variant.get("image")) is None:
+                        continue
 
-            weapons[weapon]["slug"] = Utility.Sluggify(
-                self, weapons[weapon].get("name")
-            )
+                    dbImages.append(image)
 
-            dbWeapons.append(weapons[weapon])
+                    if (
+                        Utility.CheckExists(
+                            self, "import/Modern Warfare/Images/", image, "png"
+                        )
+                        is False
+                    ):
+                        continue
+
+                    variant["slug"] = Utility.Sluggify(self, variant.get("name"))
+
+                    dbLoot.append(variant)
+                    variants.append(variant.get("id"))
+
+                weapons[weapon]["variants"] = variants
+
+                weapons[weapon]["slug"] = Utility.Sluggify(
+                    self, weapons[weapon].get("name")
+                )
+
+                dbWeapons.append(weapons[weapon])
 
         operators: self.json = Utility.ReadFile(
             self, "export/Modern Warfare/", "operators", "json"
         )
 
-        for operator in operators:
-            if operator.get("name") is None:
-                continue
-
-            if (image := operator.get("image")) is None:
-                continue
-
-            if (
-                Utility.CheckExists(self, "import/Modern Warfare/Images/", image, "png")
-                is False
-            ):
-                continue
-
-            dbImages.append(image)
-
-            # Setup the item id arrays
-            operator["skins"] = []
-            operator["executions"] = []
-            operator["quips"] = []
-
-            for item in dbLoot:
-                itemType: Optional[str] = item.get("type")
-
-                # Operator-specific item types
-                if itemType not in ["Operator Skin", "Finishing Move", "Operator Quip"]:
+        if operators is not None:
+            for operator in operators:
+                if operator.get("name") is None:
                     continue
 
-                # 29999 is the Universal Operator ID that we manually set
-                if ((opId := item.get("operatorId")) == operator.get("id")) or (
-                    opId == 29999
+                if (image := operator.get("image")) is None:
+                    continue
+
+                if (
+                    Utility.CheckExists(
+                        self, "import/Modern Warfare/Images/", image, "png"
+                    )
+                    is False
                 ):
-                    if itemType == "Operator Skin":
-                        operator["skins"].append(item.get("id"))
-                    elif itemType == "Finishing Move":
-                        operator["executions"].append(item.get("id"))
-                    elif itemType == "Operator Quip":
-                        operator["quips"].append(item.get("id"))
+                    continue
 
-            operator["slug"] = Utility.Sluggify(self, operator.get("name"))
+                dbImages.append(image)
 
-            dbOperators.append(operator)
+                # Setup the item id arrays
+                operator["skins"] = []
+                operator["executions"] = []
+                operator["quips"] = []
+
+                for item in dbLoot:
+                    itemType: Optional[str] = item.get("type")
+
+                    # Operator-specific item types
+                    if itemType not in [
+                        "Operator Skin",
+                        "Finishing Move",
+                        "Operator Quip",
+                    ]:
+                        continue
+
+                    # 29999 is the Universal Operator ID that we manually set
+                    if ((opId := item.get("operatorId")) == operator.get("id")) or (
+                        opId == 29999
+                    ):
+                        if itemType == "Operator Skin":
+                            operator["skins"].append(item.get("id"))
+                        elif itemType == "Finishing Move":
+                            operator["executions"].append(item.get("id"))
+                        elif itemType == "Operator Quip":
+                            operator["quips"].append(item.get("id"))
+
+                operator["slug"] = Utility.Sluggify(self, operator.get("name"))
+
+                dbOperators.append(operator)
+
+        battlePasses: self.json = Utility.ReadFile(
+            self, "export/Modern Warfare/", "battlePasses", "json"
+        )
+
+        if battlePasses is not None:
+            for battlePass in battlePasses:
+                if battlePass.get("name") is None:
+                    continue
+
+                for item in battlePass.get("items", []):
+                    # Unused values in the database
+                    item.pop("type", None)
+                    item.pop("billboard", None)
+
+                battlePass["slug"] = Utility.Sluggify(self, battlePass.get("name"))
+
+                dbBattlePasses.append(battlePass)
 
         Utility.WriteFile(
             self,
@@ -1817,10 +1912,21 @@ class ModernWarfare:
         Utility.WriteFile(
             self,
             "export/Modern Warfare/DB/",
+            "battlePasses",
+            "json",
+            Utility.SortList(self, dbBattlePasses, "name"),
+            compress=True,
+        )
+
+        Utility.WriteFile(
+            self,
+            "export/Modern Warfare/DB/",
             "_search",
             "txt",
             ",".join(list(set(dbImages))),
         )
 
-        count: int = len(dbLoot) + len(dbWeapons) + len(dbBundles) + len(dbOperators)
+        count: int = len(dbLoot) + len(dbWeapons) + len(dbBundles) + len(
+            dbOperators
+        ) + len(dbBattlePasses)
         log.info(f"Compiled {count:,} Database Items")

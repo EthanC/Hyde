@@ -158,6 +158,7 @@ class Utility:
     ) -> bool:
         """Animate the provided Spritesheet into a WEBM video."""
 
+        # TODO: Move title-specific logic to its corresponding class
         if itemType == "Calling Card":
             trueWidth: int = 512
             trueHeight: int = 128

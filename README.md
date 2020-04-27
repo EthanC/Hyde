@@ -30,6 +30,7 @@ python hyde.py
 ### Call of Duty: Modern Warfare
 
 -   Accessories
+-   Battle Passes
 -   Battle Pass Items
 -   Bundles
 -   Calling Cards
