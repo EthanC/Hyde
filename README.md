@@ -47,6 +47,7 @@ python hyde.py
 -   Special Items
 -   Sprays
 -   Stickers
+-   Vehicles
 -   Vehicle Camos
 -   Weapons
 -   Weapon Unlock Challenges

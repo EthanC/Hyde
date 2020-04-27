@@ -51,6 +51,7 @@ class Hyde:
         ModernWarfare.CompileSpecialItems(self)
         ModernWarfare.CompileSprays(self)
         ModernWarfare.CompileStickers(self)
+        ModernWarfare.CompileVehicles(self)
         ModernWarfare.CompileVehicleCamos(self)
         ModernWarfare.CompileWeapons(self)
         ModernWarfare.CompileWeaponUnlockChallenges(self)

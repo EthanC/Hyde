@@ -30,6 +30,7 @@ class ModernWarfare:
     - Special Items
     - Sprays
     - Stickers
+    - Vehicles
     - Vehicle Camos
     - Weapons
     - Weapon Unlock Challenges
@@ -1317,6 +1318,40 @@ class ModernWarfare:
         if status is True:
             log.info(f"Compiled {len(stickers):,} Stickers")
 
+    def CompileVehicles(self: Any) -> None:
+        """
+        Compile the Vehicle XAssets.
+
+        Requires vehicletable.csv
+        """
+
+        table: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "vehicletable", "csv"
+        )
+
+        if table is None:
+            return
+
+        vehicles: List[dict] = []
+
+        for tableRow in table:
+            vehicles.append(
+                {
+                    "id": Utility.GetColumn(self, tableRow[0]),
+                    "name": ModernWarfare.GetLocalize(self, tableRow[2]),
+                    "description": ModernWarfare.GetLocalize(self, tableRow[5]),
+                    "image": Utility.GetColumn(self, tableRow[3]),
+                    "icon": Utility.GetColumn(self, tableRow[6])
+                }
+            )
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "vehicles", "json", vehicles
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(vehicles):,} Vehicles")
+
     def CompileVehicleCamos(self: Any) -> None:
         """
         Compile the Vehicle Camo XAssets.
@@ -1327,24 +1362,22 @@ class ModernWarfare:
         ids: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "vehicle_camo_ids", "csv"
         )
-        vehCamoTable: self.csv = Utility.ReadFile(
+        table: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "vehiclecamos", "csv"
         )
 
-        if (ids is None) or (vehCamoTable is None):
+        if (ids is None) or (table is None):
             return
 
         vehCamos: List[dict] = []
 
         # Skip the first row of vehiclecamos.csv
-        for idRow, tableRow in zip(ids, vehCamoTable[1:]):
+        for idRow, tableRow in zip(ids, table[1:]):
             idColumn: self.csvColumn = Utility.GetColumn(self, idRow[0])
             tableColumn: self.csvColumn = Utility.GetColumn(self, tableRow[6])
 
             if idColumn != tableColumn:
-                tableRow: self.csvRow = Utility.GetRow(
-                    self, str(idColumn), vehCamoTable, 1
-                )
+                tableRow: self.csvRow = Utility.GetRow(self, str(idColumn), table, 1)
 
                 if tableRow is None:
                     log.warning(
