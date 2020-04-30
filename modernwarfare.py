@@ -149,9 +149,26 @@ class ModernWarfare:
             "ME_",
             "LM_",
             "BP_",
+            "KNIFE_",
             "UNIVERSAL_",
+            "BUNDLE_DESCRIPTION_",
         ]
-        ends: List[str] = [" Flavor Text...", "_DESC", " NAME MISSING", "_1", "_2"]
+        ends: List[str] = [
+            " Flavor Text...",
+            "_DESC",
+            " NAME MISSING",
+            "_0",
+            "_1",
+            "_2",
+            "_3",
+            "_4",
+            "_5",
+            "_6",
+            "_7",
+            "_8",
+            "_9",
+            "_10",
+        ]
 
         if value is None:
             return None
@@ -1341,7 +1358,7 @@ class ModernWarfare:
                     "name": ModernWarfare.GetLocalize(self, tableRow[2]),
                     "description": ModernWarfare.GetLocalize(self, tableRow[5]),
                     "image": Utility.GetColumn(self, tableRow[3]),
-                    "icon": Utility.GetColumn(self, tableRow[6])
+                    "icon": Utility.GetColumn(self, tableRow[6]),
                 }
             )
 
@@ -1396,7 +1413,10 @@ class ModernWarfare:
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                     "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
                     "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
-                    "image": Utility.GetColumn(self, tableRow[7]),
+                    "image": None
+                    if (img := Utility.GetColumn(self, tableRow[7]))
+                    == "ui_default_white"
+                    else img,
                     "background": "ui_loot_bg_vehicle",
                 }
             )
@@ -1717,8 +1737,7 @@ class ModernWarfare:
                     )
                     is False
                 ):
-                    if item.get("type") != "Battle Pass":
-                        continue
+                    continue
 
                 item["animated"] = Utility.AnimateSprite(
                     self,
