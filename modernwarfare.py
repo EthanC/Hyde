@@ -55,6 +55,9 @@ class ModernWarfare:
         self.operatorIds: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "operator_ids", "csv"
         )
+        self.weaponClasses: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "weaponclasstable", "csv"
+        )
 
     def GetLootType(self: Any, value: int) -> Optional[str]:
         """
@@ -114,6 +117,17 @@ class ModernWarfare:
             # set one ourselves.
             elif key == "universal_ref":
                 return 29999
+
+    def GetWeaponClass(self: Any, key: str) -> Optional[str]:
+        """
+        Return the name for the requested Weapon Class.
+
+        Requires weaponclasstable.csv
+        """
+
+        for weaponClass in self.weaponClasses:
+            if Utility.GetColumn(self, weaponClass[1]) == key:
+                return ModernWarfare.GetLocalize(self, weaponClass[3])
 
     def GetLocalize(self: Any, key: str) -> Optional[str]:
         """
@@ -1432,108 +1446,154 @@ class ModernWarfare:
         """
         Compile the Weapon XAssets.
         
-        Requires weapon_ids.csv and X_Y_variants.csv (for each Weapon)
+        Requires weapon_ids.csv, statstable.csv, and _variants.csv (for each Weapon).
         """
 
         ids: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "weapon_ids", "csv"
         )
+        table: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "statstable", "csv"
+        )
 
-        if ids is None:
+        if (ids is None) or (table is None):
             return
 
-        weapons: dict = {}
-        count: int = 0
+        weapons: List[dict] = []
 
-        # TODO: Cleanup this mess...
-        for idRow in ids:
-            if weapons.get((w := Utility.GetColumn(self, idRow[1]))) is None:
-                # Create the dictionary before we can populate it.
-                weapons[w] = {}
-
-                weapons[w]["id"] = Utility.GetColumn(self, idRow[0])
-                weapons[w]["name"] = Utility.GetColumn(self, idRow[6])
-                weapons[w]["description"] = (None,)  # This is determined later
-                weapons[w]["flavor"] = (None,)  # This is determined later
-                weapons[w]["type"] = ModernWarfare.GetLootType(self, int(idRow[0]))
-                weapons[w]["rarity"] = ModernWarfare.GetLootRarity(self, int(idRow[2]))
-                weapons[w]["image"] = (None,)  # This is determined later
-                weapons[w]["icon"] = f"icon_cac_weapon_{str(w)[4:]}"
-                weapons[w]["variants"] = []
-
-                if w is not None:
-                    weapons[w]["description"] = ModernWarfare.GetLocalize(
-                        self, f"PERKS/{str(w)[4:].upper()}"
-                    )
-
-                if Utility.GetColumn(self, idRow[6]) is not None:
-                    n = (
-                        str(Utility.GetColumn(self, idRow[6]))[4:]
-                        .upper()
-                        .replace("VARIANT_", "")
-                    )
-                    weapons[w]["flavor"] = ModernWarfare.GetLocalize(
-                        self, f"WEAPON_FLAVOR/{n}_FLAVOR"
-                    )
-            else:
-                weapons[w]["variants"].append(
-                    {
-                        "id": Utility.GetColumn(self, idRow[0]),
-                        "name": Utility.GetColumn(self, idRow[6]),
-                        "description": None,  # This is determined later
-                        "flavor": None,  # This is determined later
-                        "type": ModernWarfare.GetLootType(self, int(idRow[0])),
-                        "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
-                        "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
-                        "baseId": weapons[w]["id"],
-                        "image": None,  # This is determined later
-                    }
-                )
-
-            count += 1
-
-        for weapon in weapons:
-            if (n := weapons[weapon]["name"]) is None:
+        for tableRow in table:
+            if Utility.GetColumn(self, tableRow[1]) is None:
                 continue
 
-            filename: str = Utility.FindBetween(self, n, "iw8_", "_variant")
-            variants: self.csv = Utility.ReadFile(
-                self, "import/Modern Warfare/Weapons/", f"{filename}_variants", "csv"
+            weapons.append(
+                {
+                    "id": None,  # This is determined later
+                    "altId": Utility.GetColumn(self, tableRow[4]),
+                    "name": ModernWarfare.GetLocalize(self, tableRow[3]),
+                    "altName": ModernWarfare.GetLocalize(self, tableRow[55]),
+                    "description": ModernWarfare.GetLocalize(self, tableRow[7]),
+                    "type": None,  # This is determined later
+                    "rarity": None,  # This is determined later
+                    "season": None,  # This is determined later
+                    "class": ModernWarfare.GetWeaponClass(self, tableRow[1]),
+                    "image": None,  # This is determined later
+                    "icon": Utility.GetColumn(self, tableRow[57]),
+                    "statBars": [
+                        {
+                            "name": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/WEAPSTATS_ACCURACY"
+                            ),
+                            "value": float(tableRow[30]),
+                        },
+                        {
+                            "name": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/WEAPSTATS_DAMAGE"
+                            ),
+                            "value": float(tableRow[31]),
+                        },
+                        {
+                            "name": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/WEAPSTATS_RANGE"
+                            ),
+                            "value": float(tableRow[32]),
+                        },
+                        {
+                            "name": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/WEAPSTATS_ROF"
+                            ),
+                            "value": float(tableRow[33]),
+                        },
+                        {
+                            "name": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/WEAPSTATS_MOBILITY"
+                            ),
+                            "value": float(tableRow[34]),
+                        },
+                        {
+                            "name": ModernWarfare.GetLocalize(
+                                self, "LUA_MENU/WEAPSTATS_CONTROL"
+                            ),
+                            "value": float(tableRow[35]),
+                        },
+                    ],
+                    "variants": [],  # These are determined later
+                }
             )
 
-            if variants is None:
-                continue
-
-            for varRow in variants:
-                if Utility.GetColumn(self, varRow[1]) == n:
-                    weapons[weapon]["name"] = ModernWarfare.GetLocalize(
-                        self, varRow[17]
-                    )
-                    weapons[weapon]["image"] = Utility.GetColumn(self, varRow[18])
-
+        for weapon in weapons:
+            for idRow in ids:
+                if Utility.GetColumn(self, idRow[1]) != weapon.get("altId"):
                     continue
 
-                for variant in weapons[weapon]["variants"]:
-                    if Utility.GetColumn(self, varRow[1]) is None:
-                        continue
+                # When the second column of the row (rarity) is 0, that
+                # is the base weapon, not a variant.
+                if Utility.GetColumn(self, idRow[2]) == 0:
+                    weapon["id"] = Utility.GetColumn(self, idRow[0])
+                    weapon["type"] = ModernWarfare.GetLootType(self, int(idRow[0]))
+                    weapon["rarity"] = ModernWarfare.GetLootRarity(self, int(idRow[2]))
+                    weapon["season"] = ModernWarfare.GetLootSeason(self, int(idRow[5]))
+                else:
+                    weapon["variants"].append(
+                        {
+                            "id": Utility.GetColumn(self, idRow[0]),
+                            "altId": Utility.GetColumn(self, idRow[6]),
+                            "name": None,  # This is determined later
+                            "flavor": None,  # This is determined later
+                            "type": ModernWarfare.GetLootType(self, int(idRow[0])),
+                            "rarity": ModernWarfare.GetLootRarity(self, idRow[2]),
+                            "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
+                            "image": None,  # This is determined later
+                        }
+                    )
 
-                    n: str = str(Utility.GetColumn(self, varRow[1]))
+        variantCount: int = 0
+        variantFiles: List[str] = glob("import/Modern Warfare/Weapons/*.csv")
 
-                    if n == variant["name"]:
-                        variant["name"] = ModernWarfare.GetLocalize(self, varRow[17])
-                        variant["image"] = Utility.GetColumn(self, varRow[18])
+        for weapon in weapons:
+            if (altId := weapon.get("altId")) is None:
+                continue
 
-                        n: str = n[4:].replace("variant_", "").upper()
-                        variant["flavor"] = ModernWarfare.GetLocalize(
-                            self, f"WEAPON_FLAVOR/{n}_FLAVOR"
+            filename: str = altId.replace("iw8_", "") + "_variants"
+
+            for file in variantFiles:
+                if file.split(".")[0].rsplit("\\")[1] != filename:
+                    continue
+
+                variants: self.csv = Utility.ReadFile(
+                    self, "import/Modern Warfare/Weapons/", filename, "csv"
+                )
+
+                if variants is None:
+                    break
+
+                for variant in variants:
+                    # When the first column of the row is 0, that is the
+                    # base weapon, not a variant.
+                    if Utility.GetColumn(self, variant[0]) == 0:
+                        weapon["image"] = Utility.GetColumn(self, variant[18])
+
+                    for i in weapon.get("variants"):
+                        if Utility.GetColumn(self, variant[1]) != i.get("altId"):
+                            continue
+
+                        partial: str = i.get("altId").replace("iw8_", "").replace(
+                            "variant_", ""
                         )
+
+                        i["name"] = ModernWarfare.GetLocalize(self, variant[17])
+                        i["flavor"] = ModernWarfare.GetLocalize(
+                            self, f"WEAPON_FLAVOR/{partial.upper()}_FLAVOR"
+                        )
+                        i["image"] = Utility.GetColumn(self, variant[18])
+
+            variantCount += len(weapon.get("variants", []))
 
         status: bool = Utility.WriteFile(
             self, "export/Modern Warfare/", "weapons", "json", weapons
         )
 
         if status is True:
-            log.info(f"Compiled {count:,} Weapons")
+            log.info(f"Compiled {(len(weapons) + variantCount):,} Weapons")
 
     def CompileWeaponUnlockChallenges(self: Any) -> None:
         """
@@ -1803,56 +1863,65 @@ class ModernWarfare:
 
         if weapons is not None:
             for weapon in weapons:
-                if weapons[weapon].get("name") is None:
+                if weapon.get("id") is None:
+                    continue
+                elif weapon.get("name") is None:
+                    continue
+                elif (img := weapon.get("image")) is None:
+                    continue
+                elif (ico := weapon.get("icon")) is None:
                     continue
 
-                if (image := weapons[weapon].get("image")) is None:
-                    continue
-
-                if (icon := weapons[weapon].get("icon")) is not None:
-                    dbImages.append(icon)
-
-                dbImages.append(image)
+                dbImages.append(img)
+                dbImages.append(ico)
 
                 if (
                     Utility.CheckExists(
-                        self, "import/Modern Warfare/Images/", image, "png"
+                        self, "import/Modern Warfare/Images/", img, "png"
+                    )
+                    is False
+                ):
+                    continue
+                elif (
+                    Utility.CheckExists(
+                        self, "import/Modern Warfare/Images/", ico, "png"
                     )
                     is False
                 ):
                     continue
 
-                variants: List[int] = []
+                dbVariants: List[int] = []
 
-                for variant in weapons[weapon]["variants"]:
-                    if variant.get("name") is None:
+                for variant in weapon.get("variants"):
+                    if (name := variant.get("name")) is None:
+                        continue
+                    elif (img := variant.get("image")) is None:
                         continue
 
-                    if (image := variant.get("image")) is None:
-                        continue
-
-                    dbImages.append(image)
+                    dbImages.append(img)
 
                     if (
                         Utility.CheckExists(
-                            self, "import/Modern Warfare/Images/", image, "png"
+                            self, "import/Modern Warfare/Images/", img, "png"
                         )
                         is False
                     ):
                         continue
 
-                    variant["slug"] = Utility.Sluggify(self, variant.get("name"))
+                    variant["class"] = weapon.get("class")
+                    variant["baseId"] = weapon.get("id")
+                    variant["slug"] = Utility.Sluggify(self, name)
+
+                    # Unused values
+                    variant.pop("altId", None)
 
                     dbLoot.append(variant)
-                    variants.append(variant.get("id"))
+                    dbVariants.append(variant.get("id"))
 
-                weapons[weapon]["variants"] = variants
+                weapon["variants"] = dbVariants
+                weapon["slug"] = Utility.Sluggify(self, weapon.get("name"))
 
-                weapons[weapon]["slug"] = Utility.Sluggify(
-                    self, weapons[weapon].get("name")
-                )
-
-                dbWeapons.append(weapons[weapon])
+                dbWeapons.append(weapon)
 
         operators: self.json = Utility.ReadFile(
             self, "export/Modern Warfare/", "operators", "json"
