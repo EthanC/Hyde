@@ -43,7 +43,7 @@ class ModernWarfare:
         self.csv = Optional[List[List[str]]]
         self.csvRow = Optional[List[str]]
         self.csvColumn = Optional[Union[str, int]]
-        self.json = Optional[Dict[str, str]]
+        self.json = Optional[Dict[str, Any]]
 
         # Global / Reused XAssets
         self.localize: self.json = Utility.ReadFile(
@@ -217,7 +217,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        accessories: List[dict] = []
+        accessories: List[Dict[str, Any]] = []
 
         # Skip the first row of accessory_ids.csv and accessorytable.csv
         for idRow, tableRow in zip(ids[1:], table[1:]):
@@ -263,7 +263,7 @@ class ModernWarfare:
         Requires battlepass_season.csv for each desired Season.
         """
 
-        battlePasses: List[dict] = []
+        battlePasses: List[Dict[str, Any]] = []
 
         for file in glob("import/Modern Warfare/*.csv"):
             filename: str = file.rsplit("\\")[1].split(".")[0]
@@ -326,7 +326,7 @@ class ModernWarfare:
         if ids is None:
             return
 
-        items: List[dict] = []
+        items: List[Dict[str, Any]] = []
 
         for idRow in ids:
             items.append(
@@ -361,10 +361,10 @@ class ModernWarfare:
         if ids is None:
             return
 
-        bundles: List[dict] = []
+        bundles: List[Dict[str, Any]] = []
 
         for idRow in ids:
-            items: List[dict] = []
+            items: List[Dict[str, Any]] = []
 
             # Bundles contain a maximum of 10 items. The IDs for these
             # items are located between columns 14 and 24.
@@ -422,7 +422,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        cards: List[dict] = []
+        cards: List[Dict[str, Any]] = []
 
         # Skip the first row of callingcards.csv
         for idRow, tableRow in zip(ids, table[1:]):
@@ -474,7 +474,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        camos: List[dict] = []
+        camos: List[Dict[str, Any]] = []
 
         # Skip the first row of camotable.csv
         for idRow, tableRow in zip(ids, table[1:]):
@@ -536,7 +536,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        charms: List[dict] = []
+        charms: List[Dict[str, Any]] = []
 
         # Skip the first row of weaponcharmtable.csv
         for idRow, tableRow in zip(ids, table[1:]):
@@ -589,7 +589,7 @@ class ModernWarfare:
         if ids is None:
             return
 
-        consumables: List[dict] = []
+        consumables: List[Dict[str, Any]] = []
 
         for idRow in ids:
             consumables.append(
@@ -630,7 +630,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        emblems: List[dict] = []
+        emblems: List[Dict[str, Any]] = []
 
         # Skip the first row of emblemtable.csv
         for idRow, tableRow in zip(ids, table[1:]):
@@ -683,7 +683,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        executions: List[dict] = []
+        executions: List[Dict[str, Any]] = []
 
         # Skip the first 3 rows of executiontable.csv
         for idRow, tableRow in zip(ids, table[3:]):
@@ -736,7 +736,7 @@ class ModernWarfare:
         if ids is None:
             return
 
-        features: List[dict] = []
+        features: List[Dict[str, Any]] = []
 
         for idRow in ids:
             features.append(
@@ -775,7 +775,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        gestures: List[dict] = []
+        gestures: List[Dict[str, Any]] = []
 
         for idRow, tableRow in zip(ids, table):
             idColumn: self.csvColumn = Utility.GetColumn(self, idRow[1])
@@ -824,7 +824,7 @@ class ModernWarfare:
         if table is None:
             return
 
-        challenges: List[dict] = []
+        challenges: List[Dict[str, Any]] = []
 
         for tableRow in table:
             # TODO: Find a better way to determine the Season number.
@@ -874,7 +874,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        operators: List[dict] = []
+        operators: List[Dict[str, Any]] = []
 
         for idRow, tableRow in zip(ids, table):
             idColumn: self.csvColumn = Utility.GetColumn(self, idRow[1])
@@ -939,7 +939,7 @@ class ModernWarfare:
                     ):
                         continue
 
-                    extra: List[dict] = [
+                    extra: List[Dict[str, Any]] = [
                         {
                             "label": ModernWarfare.GetLocalize(
                                 self, "CP_INTEL/BILLET_NAME_TITLE"
@@ -1116,7 +1116,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        quips: List[dict] = []
+        quips: List[Dict[str, Any]] = []
 
         # Skip the first row of operatorquips.csv
         for idRow, tableRow in zip(ids, table[1:]):
@@ -1171,7 +1171,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        skins: List[dict] = []
+        skins: List[Dict[str, Any]] = []
 
         for idRow, tableRow in zip(ids, table):
             idColumn: self.csvColumn = Utility.GetColumn(self, idRow[1])
@@ -1223,7 +1223,7 @@ class ModernWarfare:
         if ids is None:
             return
 
-        items: List[dict] = []
+        items: List[Dict[str, Any]] = []
 
         for idRow in ids:
             items.append(
@@ -1261,7 +1261,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        sprays: List[dict] = []
+        sprays: List[Dict[str, Any]] = []
 
         for idRow, tableRow in zip(ids, table):
             idColumn: self.csvColumn = Utility.GetColumn(self, idRow[1])
@@ -1313,7 +1313,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        stickers: List[dict] = []
+        stickers: List[Dict[str, Any]] = []
 
         # Skip the first 5 rows of weaponstickertable.csv
         for idRow, tableRow in zip(ids, table[5:]):
@@ -1363,7 +1363,7 @@ class ModernWarfare:
         if table is None:
             return
 
-        vehicles: List[dict] = []
+        vehicles: List[Dict[str, Any]] = []
 
         for tableRow in table:
             vehicles.append(
@@ -1400,7 +1400,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        vehCamos: List[dict] = []
+        vehCamos: List[Dict[str, Any]] = []
 
         # Skip the first row of vehiclecamos.csv
         for idRow, tableRow in zip(ids, table[1:]):
@@ -1459,7 +1459,7 @@ class ModernWarfare:
         if (ids is None) or (table is None):
             return
 
-        weapons: List[dict] = []
+        weapons: List[Dict[str, Any]] = []
 
         for tableRow in table:
             if Utility.GetColumn(self, tableRow[1]) is None:
@@ -1542,6 +1542,7 @@ class ModernWarfare:
                             "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                             "rarity": ModernWarfare.GetLootRarity(self, idRow[2]),
                             "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
+                            "tracers": None,  # This is determined later
                             "image": None,  # This is determined later
                         }
                     )
@@ -1584,6 +1585,15 @@ class ModernWarfare:
                         i["flavor"] = ModernWarfare.GetLocalize(
                             self, f"WEAPON_FLAVOR/{partial.upper()}_FLAVOR"
                         )
+                        # Weapons which have a variant with tracers will
+                        # have more columns than those that do not.
+                        if len(variant) >= 21:
+                            i["tracers"] = (
+                                None
+                                if (tracers := Utility.GetColumn(self, variant[20]))
+                                is None
+                                else str(tracers).capitalize()
+                            )
                         i["image"] = Utility.GetColumn(self, variant[18])
 
             variantCount += len(weapon.get("variants", []))
@@ -1609,7 +1619,7 @@ class ModernWarfare:
         if ids is None:
             return
 
-        challenges: List[dict] = []
+        challenges: List[Dict[str, Any]] = []
 
         for idRow in ids:
             challenges.append(
@@ -1748,11 +1758,11 @@ class ModernWarfare:
         """
 
         # Database output files
-        dbLoot: List[dict] = []
-        dbBundles: List[dict] = []
-        dbWeapons: List[dict] = []
-        dbOperators: List[dict] = []
-        dbBattlePasses: List[dict] = []
+        dbLoot: List[Dict[str, Any]] = []
+        dbBundles: List[Dict[str, Any]] = []
+        dbWeapons: List[Dict[str, Any]] = []
+        dbOperators: List[Dict[str, Any]] = []
+        dbBattlePasses: List[Dict[str, Any]] = []
         dbImages: List[str] = []
 
         include: List[str] = [
@@ -1891,6 +1901,9 @@ class ModernWarfare:
                     continue
 
                 dbVariants: List[int] = []
+                weapon["variants"] = Utility.SortList(
+                    self, weapon.get("variants", []), "name"
+                )
 
                 for variant in weapon.get("variants"):
                     if (name := variant.get("name")) is None:

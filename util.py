@@ -5,7 +5,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from PIL import Image
 
@@ -120,20 +120,17 @@ class Utility:
 
         return output
 
-    def FindBetween(self: Any, input: str, start: str, end: str) -> str:
-        """Return the text found between two strings."""
-
-        output: str = input.split(start)[1].split(end)[0]
-
-        return output
-
-    def SortList(self: Any, array: List[dict], key: str) -> List[dict]:
+    def SortList(
+        self: Any, array: List[Dict[str, Any]], key: str
+    ) -> List[Dict[str, Any]]:
         """
         Alphabetically sort the provided list of dicts by the specified key.
         Null values are placed at the end of the list.
         """
 
-        sort: List[dict] = sorted(array, key=lambda k: (k[key] is None, k[key]))
+        sort: List[Dict[str, Any]] = sorted(
+            array, key=lambda k: (k[key] is None, k[key])
+        )
 
         return sort
 
@@ -194,7 +191,9 @@ class Utility:
                         frame.save(f"tmp/{i:03}.png")
 
                         if i == 1:
-                            frame.save(f"export/Modern Warfare/DB/Images/{filename}.png")
+                            frame.save(
+                                f"export/Modern Warfare/DB/Images/{filename}.png"
+                            )
 
                         i += 1
 
