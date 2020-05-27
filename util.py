@@ -121,16 +121,21 @@ class Utility:
         return output
 
     def SortList(
-        self: Any, array: List[Dict[str, Any]], key: str
+        self: Any, array: List[Dict[str, Any]], key: str, **kwargs
     ) -> List[Dict[str, Any]]:
         """
         Alphabetically sort the provided list of dicts by the specified key.
         Null values are placed at the end of the list.
         """
 
-        sort: List[Dict[str, Any]] = sorted(
-            array, key=lambda k: (k[key] is None, k[key])
-        )
+        if (key2 := kwargs.get("key2", key)) is not None:
+            sort: List[Dict[str, Any]] = sorted(
+                array, key=lambda k: (k[key] is None, k[key], k[key2] is None, k[key2])
+            )
+        else:
+            sort: List[Dict[str, Any]] = sorted(
+                array, key=lambda k: (k[key] is None, k[key])
+            )
 
         return sort
 

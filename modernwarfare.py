@@ -58,6 +58,9 @@ class ModernWarfare:
         self.weaponClasses: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "weaponclasstable", "csv"
         )
+        self.attachmentCategories: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "attachmentcategorytable", "csv"
+        )
 
     def GetLootType(self: Any, value: int) -> Optional[str]:
         """
@@ -129,6 +132,17 @@ class ModernWarfare:
             if Utility.GetColumn(self, weaponClass[1]) == key:
                 return ModernWarfare.GetLocalize(self, weaponClass[3])
 
+    def GetAttachmentCategory(self: Any, key: str) -> Optional[str]:
+        """
+        Return the name for the requested Attachment Category.
+
+        Requires attachmentcategorytable.csv
+        """
+
+        for attachCat in self.attachmentCategories:
+            if Utility.GetColumn(self, attachCat[1]) == key:
+                return ModernWarfare.GetLocalize(self, attachCat[2])
+
     def GetLocalize(self: Any, key: str) -> Optional[str]:
         """
         Return the localized string for the requested key.
@@ -166,6 +180,8 @@ class ModernWarfare:
             "KNIFE_",
             "UNIVERSAL_",
             "BUNDLE_DESCRIPTION_",
+            "New text",
+            "Do not use",
         ]
         ends: List[str] = [
             " Flavor Text...",
@@ -182,6 +198,7 @@ class ModernWarfare:
             "_8",
             "_9",
             "_10",
+            " description",
         ]
 
         if value is None:
@@ -893,7 +910,7 @@ class ModernWarfare:
             operators.append(
                 {
                     "id": Utility.GetColumn(self, idRow[0]),
-                    "alternateId": Utility.GetColumn(self, tableRow[0]),
+                    "altId": Utility.GetColumn(self, tableRow[0]),
                     "name": ModernWarfare.GetLocalize(self, tableRow[2]).title(),
                     "description": ModernWarfare.GetLocalize(self, tableRow[16]),
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
@@ -934,9 +951,7 @@ class ModernWarfare:
         if billets is not None:
             for billetRow in billets:
                 for operator in operators:
-                    if Utility.GetColumn(self, billetRow[0]) != operator.get(
-                        "alternateId"
-                    ):
+                    if Utility.GetColumn(self, billetRow[0]) != operator.get("altId"):
                         continue
 
                     extra: List[Dict[str, Any]] = [
@@ -1455,8 +1470,23 @@ class ModernWarfare:
         table: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "statstable", "csv"
         )
+        attachMap: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "attachmentmap", "csv"
+        )
+        attachIds: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "attachment_ids", "csv"
+        )
+        attachTable: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "attachmenttable", "csv"
+        )
 
-        if (ids is None) or (table is None):
+        if (
+            (ids is None)
+            or (table is None)
+            or (attachMap is None)
+            or (attachIds is None)
+            or (attachTable is None)
+        ):
             return
 
         weapons: List[Dict[str, Any]] = []
@@ -1480,42 +1510,43 @@ class ModernWarfare:
                     "icon": Utility.GetColumn(self, tableRow[57]),
                     "statBars": [
                         {
-                            "name": ModernWarfare.GetLocalize(
+                            "label": ModernWarfare.GetLocalize(
                                 self, "LUA_MENU/WEAPSTATS_ACCURACY"
                             ),
                             "value": float(tableRow[30]),
                         },
                         {
-                            "name": ModernWarfare.GetLocalize(
+                            "label": ModernWarfare.GetLocalize(
                                 self, "LUA_MENU/WEAPSTATS_DAMAGE"
                             ),
                             "value": float(tableRow[31]),
                         },
                         {
-                            "name": ModernWarfare.GetLocalize(
+                            "label": ModernWarfare.GetLocalize(
                                 self, "LUA_MENU/WEAPSTATS_RANGE"
                             ),
                             "value": float(tableRow[32]),
                         },
                         {
-                            "name": ModernWarfare.GetLocalize(
+                            "label": ModernWarfare.GetLocalize(
                                 self, "LUA_MENU/WEAPSTATS_ROF"
                             ),
                             "value": float(tableRow[33]),
                         },
                         {
-                            "name": ModernWarfare.GetLocalize(
+                            "label": ModernWarfare.GetLocalize(
                                 self, "LUA_MENU/WEAPSTATS_MOBILITY"
                             ),
                             "value": float(tableRow[34]),
                         },
                         {
-                            "name": ModernWarfare.GetLocalize(
+                            "label": ModernWarfare.GetLocalize(
                                 self, "LUA_MENU/WEAPSTATS_CONTROL"
                             ),
                             "value": float(tableRow[35]),
                         },
                     ],
+                    "attachments": [],  # These are determined later
                     "variants": [],  # These are determined later
                 }
             )
@@ -1543,6 +1574,7 @@ class ModernWarfare:
                             "rarity": ModernWarfare.GetLootRarity(self, idRow[2]),
                             "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
                             "tracers": None,  # This is determined later
+                            # "includedAttachments": [],  # TODO
                             "image": None,  # This is determined later
                         }
                     )
@@ -1597,6 +1629,94 @@ class ModernWarfare:
                         i["image"] = Utility.GetColumn(self, variant[18])
 
             variantCount += len(weapon.get("variants", []))
+
+        for weapon in weapons:
+            for mapRow in attachMap:
+                if Utility.GetColumn(self, mapRow[0]) != weapon.get("altId"):
+                    continue
+
+                # Not including column 0, which is the weapon's altId, there are
+                # 163 columns in attachmentmap.csv.
+                for i in range(1, 163):
+                    if (altId := Utility.GetColumn(self, mapRow[i])) is None:
+                        continue
+
+                    weapon["attachments"].append(
+                        {
+                            "id": None,  # This is determined later
+                            "altId": altId,
+                            "name": None,  # This is determined later
+                            "description": None,  # This is determined later
+                            "type": None,  # This is determined later
+                            "image": None,  # This is determined later
+                            "attributes": [],  # These are determined later
+                            "statBars": [],  # These are determined later
+                        }
+                    )
+
+            for attachment in weapon.get("attachments"):
+                for idRow in attachIds:
+                    if Utility.GetColumn(self, idRow[1]) != attachment.get("altId"):
+                        continue
+
+                    attachment["id"] = Utility.GetColumn(self, idRow[0])
+
+            for attachment in weapon.get("attachments"):
+                for tableRow in attachTable:
+                    if Utility.GetColumn(self, tableRow[4]) != attachment.get("altId"):
+                        continue
+
+                    attachment["name"] = ModernWarfare.GetLocalize(self, tableRow[3])
+                    attachment["description"] = ModernWarfare.GetLocalize(
+                        self, tableRow[7]
+                    )
+                    attachment["type"] = ModernWarfare.GetAttachmentCategory(
+                        self, tableRow[2]
+                    )
+                    attachment["image"] = Utility.GetColumn(self, tableRow[6])
+
+                    # Columns 21 through 26 contain the attachment attributes.
+                    for i in range(21, 27):
+                        if (col := Utility.GetColumn(self, tableRow[i])) is None:
+                            continue
+
+                        col: Any = str(col).split("|")
+
+                        attachment["attributes"].append(
+                            {
+                                "label": ModernWarfare.GetLocalize(self, col[0]),
+                                "value": "+"
+                                if col[1] == "1"
+                                else "-"
+                                if col[1] == "-1"
+                                else None,
+                            }
+                        )
+
+                    statBarNames: List[str] = [
+                        "LUA_MENU/WEAPSTATS_ACCURACY",
+                        "LUA_MENU/WEAPSTATS_DAMAGE",
+                        "LUA_MENU/WEAPSTATS_RANGE",
+                        "LUA_MENU/WEAPSTATS_ROF",
+                        "LUA_MENU/WEAPSTATS_MOBILITY",
+                        "LUA_MENU/WEAPSTATS_CONTROL",
+                    ]
+
+                    # Columns 14 through 19 contain the attachment statistic bars.
+                    for name, i in enumerate(range(14, 20)):
+                        if ((val := Utility.GetColumn(self, tableRow[i])) == 0) or (
+                            val is None
+                        ):
+                            continue
+
+                        attachment["statBars"].append(
+                            {
+                                "label": ModernWarfare.GetLocalize(
+                                    self, statBarNames[name]
+                                ),
+                                "value": float(tableRow[i]),
+                            }
+                        )
 
         status: bool = Utility.WriteFile(
             self, "export/Modern Warfare/", "weapons", "json", weapons
@@ -1748,7 +1868,7 @@ class ModernWarfare:
         """
         Compile the XAssets for the COD Tracker Database.
 
-        https://cod.tracker.gg/modern-warfare/db/loot
+        https://tracker.gg/warzone/db/loot
         
         Requires accessories.json, battlePasses.json, battlePassItems.json,
         bundles.json, callingCards.json, camos.json, charms.json, consumables.json,
@@ -1799,7 +1919,7 @@ class ModernWarfare:
                 if (image := item.get("image")) is None:
                     continue
 
-                dbImages.append(image)
+                # dbImages.append(image)
 
                 if (
                     Utility.CheckExists(
@@ -1837,8 +1957,8 @@ class ModernWarfare:
                 if (logo := bundle.get("logo")) is None:
                     continue
 
-                dbImages.append(billboard)
-                dbImages.append(logo)
+                # dbImages.append(billboard)
+                # dbImages.append(logo)
 
                 if (
                     Utility.CheckExists(
@@ -1882,8 +2002,8 @@ class ModernWarfare:
                 elif (ico := weapon.get("icon")) is None:
                     continue
 
-                dbImages.append(img)
-                dbImages.append(ico)
+                # dbImages.append(img)
+                # dbImages.append(ico)
 
                 if (
                     Utility.CheckExists(
@@ -1900,6 +2020,39 @@ class ModernWarfare:
                 ):
                     continue
 
+                dbAttachments: List[dict] = []
+
+                for attachment in weapon.get("attachments"):
+                    if attachment.get("id") is None:
+                        continue
+                    elif attachment.get("altId") is None:
+                        continue
+                    elif attachment.get("name") is None:
+                        continue
+                    elif (img := attachment.get("image")) is None:
+                        continue
+
+                    dbImages.append(img)
+
+                    if (
+                        Utility.CheckExists(
+                            self, "import/Modern Warfare/Images/", img, "png"
+                        )
+                        is False
+                    ):
+                        continue
+
+                    attachment["background"] = "ui_loot_bg_generic"
+
+                    # Unused values in the database
+                    attachment.pop("altId", None)
+
+                    dbAttachments.append(attachment)
+
+                weapon["attachments"] = Utility.SortList(
+                    self, dbAttachments, "type", key2="name"
+                )
+
                 dbVariants: List[int] = []
                 weapon["variants"] = Utility.SortList(
                     self, weapon.get("variants", []), "name"
@@ -1911,7 +2064,7 @@ class ModernWarfare:
                     elif (img := variant.get("image")) is None:
                         continue
 
-                    dbImages.append(img)
+                    # dbImages.append(img)
 
                     if (
                         Utility.CheckExists(
@@ -1956,7 +2109,7 @@ class ModernWarfare:
                 ):
                     continue
 
-                dbImages.append(image)
+                # dbImages.append(image)
 
                 # Setup the item id arrays
                 operator["skins"] = []
@@ -1984,6 +2137,12 @@ class ModernWarfare:
                             operator["executions"].append(item.get("id"))
                         elif itemType == "Operator Quip":
                             operator["quips"].append(item.get("id"))
+
+                # Unused values in the database
+                operator.pop("altId", None)
+                operator.pop("type", None)
+                operator.pop("rarity", None)
+                operator.pop("branchIcon", None)
 
                 operator["slug"] = Utility.Sluggify(self, operator.get("name"))
 

@@ -1,6 +1,6 @@
 # Hyde
 
-Hyde is a Call of Duty XAsset compiler that converts raw assets into digestible data. Its main purpose is to produce the data which powers the [COD Tracker Database](https://cod.tracker.gg/modern-warfare/db/loot).
+Hyde is a Call of Duty XAsset compiler that converts raw assets into digestible data. Its main purpose is to produce the data which powers the [COD Tracker Database](https://tracker.gg/warzone/db/loot).
 
 Hyde is intended for use with [Jekyll](https://github.com/EthanC/Jekyll), a Call of Duty XAsset exporter. Raw XAssets are not provided, you must obtain them yourself.
 
