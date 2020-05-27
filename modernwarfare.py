@@ -1919,7 +1919,7 @@ class ModernWarfare:
                 if (image := item.get("image")) is None:
                     continue
 
-                # dbImages.append(image)
+                dbImages.append(image)
 
                 if (
                     Utility.CheckExists(
@@ -1957,8 +1957,8 @@ class ModernWarfare:
                 if (logo := bundle.get("logo")) is None:
                     continue
 
-                # dbImages.append(billboard)
-                # dbImages.append(logo)
+                dbImages.append(billboard)
+                dbImages.append(logo)
 
                 if (
                     Utility.CheckExists(
@@ -2002,8 +2002,8 @@ class ModernWarfare:
                 elif (ico := weapon.get("icon")) is None:
                     continue
 
-                # dbImages.append(img)
-                # dbImages.append(ico)
+                dbImages.append(img)
+                dbImages.append(ico)
 
                 if (
                     Utility.CheckExists(
@@ -2064,7 +2064,7 @@ class ModernWarfare:
                     elif (img := variant.get("image")) is None:
                         continue
 
-                    # dbImages.append(img)
+                    dbImages.append(img)
 
                     if (
                         Utility.CheckExists(
@@ -2109,7 +2109,7 @@ class ModernWarfare:
                 ):
                     continue
 
-                # dbImages.append(image)
+                dbImages.append(image)
 
                 # Setup the item id arrays
                 operator["skins"] = []
