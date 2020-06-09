@@ -1461,7 +1461,9 @@ class ModernWarfare:
         """
         Compile the Weapon XAssets.
         
-        Requires weapon_ids.csv, statstable.csv, and _variants.csv (for each Weapon).
+        Requires weapon_ids.csv, statstable.csv, and attachmenttable.csv.
+
+        Requires *_variants.csv, *_progression.csv, and *_attachments.csv (for each Weapon.)
         """
 
         ids: self.csv = Utility.ReadFile(
@@ -1470,23 +1472,11 @@ class ModernWarfare:
         table: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "statstable", "csv"
         )
-        attachMap: self.csv = Utility.ReadFile(
-            self, "import/Modern Warfare/", "attachmentmap", "csv"
-        )
-        attachIds: self.csv = Utility.ReadFile(
-            self, "import/Modern Warfare/", "attachment_ids", "csv"
-        )
         attachTable: self.csv = Utility.ReadFile(
             self, "import/Modern Warfare/", "attachmenttable", "csv"
         )
 
-        if (
-            (ids is None)
-            or (table is None)
-            or (attachMap is None)
-            or (attachIds is None)
-            or (attachTable is None)
-        ):
+        if (ids is None) or (table is None) or (attachTable is None):
             return
 
         weapons: List[Dict[str, Any]] = []
@@ -1574,13 +1564,12 @@ class ModernWarfare:
                             "rarity": ModernWarfare.GetLootRarity(self, idRow[2]),
                             "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
                             "tracers": None,  # This is determined later
-                            # "includedAttachments": [],  # TODO
                             "image": None,  # This is determined later
                         }
                     )
 
         variantCount: int = 0
-        variantFiles: List[str] = glob("import/Modern Warfare/Weapons/*.csv")
+        weaponFiles: List[str] = glob("import/Modern Warfare/Weapons/*.csv")
 
         for weapon in weapons:
             if (altId := weapon.get("altId")) is None:
@@ -1588,7 +1577,7 @@ class ModernWarfare:
 
             filename: str = altId.replace("iw8_", "") + "_variants"
 
-            for file in variantFiles:
+            for file in weaponFiles:
                 if file.split(".")[0].rsplit("\\")[1] != filename:
                     continue
 
@@ -1631,39 +1620,65 @@ class ModernWarfare:
             variantCount += len(weapon.get("variants", []))
 
         for weapon in weapons:
-            for mapRow in attachMap:
-                if Utility.GetColumn(self, mapRow[0]) != weapon.get("altId"):
+            if (altId := weapon.get("altId")) is None:
+                continue
+
+            filename: str = altId.replace("iw8_", "") + "_progression"
+
+            for file in weaponFiles:
+                if file.split(".")[0].rsplit("\\")[1] != filename:
                     continue
 
-                # Not including column 0, which is the weapon's altId, there are
-                # 163 columns in attachmentmap.csv.
-                for i in range(1, 163):
-                    if (altId := Utility.GetColumn(self, mapRow[i])) is None:
-                        continue
+                progression: self.csv = Utility.ReadFile(
+                    self, "import/Modern Warfare/Weapons/", filename, "csv"
+                )
 
+                # Skip the first and last rows of *_progression.csv
+                for level in progression[1:-1]:
                     weapon["attachments"].append(
                         {
-                            "id": None,  # This is determined later
-                            "altId": altId,
+                            "id": Utility.GetColumn(self, level[1]),
+                            "altId": None,  # This is determined later
                             "name": None,  # This is determined later
                             "description": None,  # This is determined later
                             "type": None,  # This is determined later
+                            "unlock": Utility.GetColumn(self, level[0]),
                             "image": None,  # This is determined later
                             "attributes": [],  # These are determined later
                             "statBars": [],  # These are determined later
                         }
                     )
 
-            for attachment in weapon.get("attachments"):
-                for idRow in attachIds:
-                    if Utility.GetColumn(self, idRow[1]) != attachment.get("altId"):
-                        continue
+            filename: str = f"{altId}_attachment_ids"
 
-                    attachment["id"] = Utility.GetColumn(self, idRow[0])
+            for file in weaponFiles:
+                if file.split(".")[0].rsplit("\\")[1] != filename:
+                    continue
+
+                attachIds: self.csv = Utility.ReadFile(
+                    self, "import/Modern Warfare/Weapons/", filename, "csv"
+                )
+
+                for attachId in attachIds:
+                    for attachment in weapon.get("attachments"):
+                        if Utility.GetColumn(self, attachId[0]) != attachment.get("id"):
+                            continue
+
+                        attachment["altId"] = Utility.GetColumn(self, attachId[1])
 
             for attachment in weapon.get("attachments"):
+                attachId: Optional[str] = attachment.get("altId")
+                weaponId: Optional[str] = weapon.get("altId")
+
+                if (attachId is None) or (weaponId is None):
+                    continue
+
                 for tableRow in attachTable:
-                    if Utility.GetColumn(self, tableRow[4]) != attachment.get("altId"):
+                    if Utility.GetColumn(self, tableRow[4]) == attachment.get("altId"):
+                        pass
+                    elif Utility.GetColumn(self, tableRow[4]) == attachment.get("altId") + "_" + weaponId.split("_")[-1]:
+                        pass
+                    else:
                         continue
 
                     attachment["name"] = ModernWarfare.GetLocalize(self, tableRow[3])
