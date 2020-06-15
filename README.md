@@ -5,7 +5,7 @@ Hyde is a Call of Duty XAsset compiler that converts raw assets into digestible 
 Hyde is intended for use with [Jekyll](https://github.com/EthanC/Jekyll), a Call of Duty XAsset exporter. Raw XAssets are not provided, you must obtain them yourself.
 
 <p align="center">
-    <img src="https://i.imgur.com/lHH1QyS.png" draggable="false">
+    <img src="https://i.imgur.com/0rPZTzB.png" draggable="false">
 </p>
 
 ## Requirements
