@@ -21,8 +21,11 @@ class ModernWarfare:
     - Charms
     - Consumables
     - Emblems
-    - Finishing Moves
+    - Executions
     - Features
+    - Gestures
+    - Missions
+    - Mission Items
     - Officer Challenges
     - Operators
     - Operator Quips
@@ -32,10 +35,11 @@ class ModernWarfare:
     - Stickers
     - Vehicles
     - Vehicle Camos
+    - Vehicle Horns
     - Weapons
     - Weapon Unlock Challenges
-    - Weekly Warzone Challenges
     - Weekly Multiplayer Challenges
+    - Weekly Warzone Challenges
     """
 
     def __init__(self: Any):
@@ -156,8 +160,6 @@ class ModernWarfare:
             "ST CARD ",
             "ST_CARD_",
             "CARD ",
-            "EMBLEM 6",
-            "EMBLEM 7",
             "EMBLEM_",
             "STICKER ",
             "STICKER_",
@@ -177,11 +179,33 @@ class ModernWarfare:
             "ME_",
             "LM_",
             "BP_",
+            "AKIMBO_",
             "KNIFE_",
             "UNIVERSAL_",
             "BUNDLE_DESCRIPTION_",
             "New text",
             "Do not use",
+            "EMBLEM 0",
+            "EMBLEM 1",
+            "EMBLEM 2",
+            "EMBLEM 3",
+            "EMBLEM 4",
+            "EMBLEM 5",
+            "EMBLEM 6",
+            "EMBLEM 7",
+            "EMBLEM 8",
+            "EMBLEM 9",
+            "EMBLEM MC",
+            "SEASON0_",
+            "SEASON1_",
+            "SEASON2_",
+            "SEASON3_",
+            "SEASON4_",
+            "SEASON5_",
+            "SEASON6_",
+            "SEASON7_",
+            "SEASON8_",
+            "SEASON9_",
         ]
         ends: List[str] = [
             " Flavor Text...",
@@ -199,6 +223,7 @@ class ModernWarfare:
             "_9",
             "_10",
             " description",
+            "_GLOBAL",
         ]
 
         if value is None:
@@ -409,7 +434,8 @@ class ModernWarfare:
                     if (img := Utility.GetColumn(self, idRow[8])) == "placeholder_x"
                     else img,
                     "price": None
-                    if (price := Utility.GetColumn(self, idRow[10])) == 10000
+                    if ((price := Utility.GetColumn(self, idRow[10])) == 10000)
+                    or (price == 99)
                     else price,
                     "items": items,
                 }
@@ -617,7 +643,8 @@ class ModernWarfare:
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                     "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
                     "image": None
-                    if (img := Utility.GetColumn(self, idRow[9])) == "placeholder_x"
+                    if ((img := Utility.GetColumn(self, idRow[9])) == "placeholder_x")
+                    or (img == "white")
                     else img,
                     "background": "ui_loot_bg_generic",
                 }
@@ -763,7 +790,9 @@ class ModernWarfare:
                     "description": ModernWarfare.GetLocalize(self, idRow[7]),
                     "type": ModernWarfare.GetLootType(self, int(idRow[0])),
                     "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
-                    "image": Utility.GetColumn(self, idRow[9]),
+                    "image": None
+                    if (img := Utility.GetColumn(self, idRow[9])) == "white"
+                    else img,
                     "background": "ui_loot_bg_generic",
                 }
             )
@@ -826,6 +855,128 @@ class ModernWarfare:
 
         if status is True:
             log.info(f"Compiled {len(gestures):,} Gestures")
+
+    def CompileMissions(self: Any) -> None:
+        """
+        Compile the Mission XAssets.
+
+        Requires quest_challenges.csv and intel_challenges.csv.
+        """
+
+        ids: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "quest_challenges", "csv"
+        )
+        intelTable: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "intel_challenges", "csv"
+        )
+
+        if (ids is None) or (intelTable is None):
+            return
+
+        missions: List[Dict[str, Any]] = []
+        last: Optional[str] = None
+
+        for idRow in ids:
+            if (name := ModernWarfare.GetLocalize(self, idRow[2])) != last:
+                missions.append(
+                    {
+                        "name": name,
+                        "description": ModernWarfare.GetLocalize(self, idRow[13]),
+                        "season": ModernWarfare.GetLootSeason(
+                            self, (int(idRow[17]) * 1000)
+                        ),
+                        "image": Utility.GetColumn(self, idRow[4]),
+                        "objectives": [
+                            {
+                                "id": Utility.GetColumn(self, idRow[0]),
+                                "altId": Utility.GetColumn(self, idRow[1]),
+                                "description": ModernWarfare.GetLocalize(
+                                    self, idRow[3]
+                                ),
+                                "xp": Utility.GetColumn(self, idRow[8]),
+                                "rewards": [],
+                            }
+                        ],
+                    }
+                )
+
+                last: Optional[str] = name
+            else:
+                missions[-1]["objectives"].append(
+                    {
+                        "id": Utility.GetColumn(self, idRow[0]),
+                        "altId": Utility.GetColumn(self, idRow[1]),
+                        "description": ModernWarfare.GetLocalize(self, idRow[3]),
+                        "xp": Utility.GetColumn(self, idRow[8]),
+                        "rewards": [],
+                    }
+                )
+
+            if (lootId := Utility.GetColumn(self, idRow[9])) is not None:
+                missions[-1]["objectives"][-1]["rewards"].append(
+                    {"id": lootId, "type": ModernWarfare.GetLootType(self, int(lootId))}
+                )
+
+            if (desc := missions[-1]["objectives"][-1].get("description")) is not None:
+                missions[-1]["objectives"][-1]["description"] = desc.replace(
+                    "&&1", idRow[6]
+                )
+
+        for tableRow in intelTable:
+            for mission in missions:
+                for objective in mission.get("objectives", []):
+                    if tableRow[0] != objective.get("altId"):
+                        continue
+
+                    objective["image"] = Utility.GetColumn(self, tableRow[11])
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "missions", "json", missions
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(missions):,} Missions")
+
+    def CompileMissionItems(self: Any) -> None:
+        """
+        Compile the Mission Item XAssets.
+
+        Requires mission_ids.csv.
+        """
+
+        ids: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "mission_ids", "csv"
+        )
+
+        if ids is None:
+            return
+
+        missionItems: List[Dict[str, Any]] = []
+
+        for idRow in ids:
+            missionItems.append(
+                {
+                    "id": Utility.GetColumn(self, idRow[0]),
+                    "name": ModernWarfare.GetLocalize(self, idRow[9]),
+                    "type": ModernWarfare.GetLootType(self, int(idRow[0])),
+                    "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
+                    "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
+                    "image": Utility.GetColumn(self, idRow[8]),
+                    "rewards": [
+                        {
+                            "id": Utility.GetColumn(self, idRow[7]),
+                            "type": ModernWarfare.GetLootType(self, int(idRow[7])),
+                        }
+                    ],
+                }
+            )
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "missionItems", "json", missionItems
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(missionItems):,} Mission Items")
 
     def CompileOfficerChallenges(self: Any) -> None:
         """
@@ -1457,6 +1608,60 @@ class ModernWarfare:
         if status is True:
             log.info(f"Compiled {len(vehCamos):,} Vehicle Camos")
 
+    def CompileVehicleHorns(self: Any) -> None:
+        """
+        Compile the Vehicle Horn XAssets.
+
+        Requires vehicle_horn_ids.csv.
+        """
+
+        ids: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "vehicle_horn_ids", "csv"
+        )
+        table: self.csv = Utility.ReadFile(
+            self, "import/Modern Warfare/", "vehiclehorns", "csv"
+        )
+
+        if (ids is None) or (table is None):
+            return
+
+        horns: List[Dict[str, Any]] = []
+
+        # Skip the first row of vehiclehorns.csv
+        for idRow, tableRow in zip(ids, table[1:]):
+            idColumn: self.csvColumn = Utility.GetColumn(self, idRow[1])
+            tableColumn: self.csvColumn = Utility.GetColumn(self, tableRow[1])
+
+            if idColumn != tableColumn:
+                tableRow: self.csvRow = Utility.GetRow(self, str(idColumn), table, 1)
+
+                if tableRow is None:
+                    log.warning(
+                        f"Mismatch in vehicle_horn_ids.csv, {idColumn} does not exist in vehiclehorns.csv ({tableColumn})"
+                    )
+
+                    continue
+
+            horns.append(
+                {
+                    "id": Utility.GetColumn(self, idRow[0]),
+                    "name": None
+                    if (n := ModernWarfare.GetLocalize(self, tableRow[2])) == "Locked"
+                    else n,
+                    "type": ModernWarfare.GetLootType(self, int(idRow[0])),
+                    "rarity": ModernWarfare.GetLootRarity(self, int(idRow[2])),
+                    "season": ModernWarfare.GetLootSeason(self, int(idRow[5])),
+                    "image": "ui_loot_bg_vehicle_horn",
+                }
+            )
+
+        status: bool = Utility.WriteFile(
+            self, "export/Modern Warfare/", "vehicleHorns", "json", horns
+        )
+
+        if status is True:
+            log.info(f"Compiled {len(horns):,} Vehicle Horns")
+
     def CompileWeapons(self: Any) -> None:
         """
         Compile the Weapon XAssets.
@@ -1676,7 +1881,10 @@ class ModernWarfare:
                 for tableRow in attachTable:
                     if Utility.GetColumn(self, tableRow[4]) == attachment.get("altId"):
                         pass
-                    elif Utility.GetColumn(self, tableRow[4]) == attachment.get("altId") + "_" + weaponId.split("_")[-1]:
+                    elif (
+                        Utility.GetColumn(self, tableRow[4])
+                        == attachment.get("altId") + "_" + weaponId.split("_")[-1]
+                    ):
                         pass
                     else:
                         continue
@@ -1887,9 +2095,9 @@ class ModernWarfare:
         
         Requires accessories.json, battlePasses.json, battlePassItems.json,
         bundles.json, callingCards.json, camos.json, charms.json, consumables.json,
-        emblems.json, executions.json, features.json, gestures.json, operators.json,
-        quips.json, skins.json, specialItems.json, sprays.json, stickers.json,
-        vehicleCamos.json, and weapons.json
+        emblems.json, executions.json, features.json, gestures.json, missionItems.json,
+        operators.json, quips.json, skins.json, specialItems.json, sprays.json,
+        stickers.json, vehicleCamos.json, vehicleHorns.json, and weapons.json
         """
 
         # Database output files
@@ -1911,12 +2119,14 @@ class ModernWarfare:
             "executions.json",
             "features.json",
             "gestures.json",
+            "missionItems.json",
             "quips.json",
             "skins.json",
             "specialItems.json",
             "sprays.json",
             "stickers.json",
             "vehicleCamos.json",
+            "vehicleHorns.json",
         ]
 
         for file in glob("export/Modern Warfare/*.json"):

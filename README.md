@@ -38,8 +38,11 @@ python hyde.py
 -   Charms
 -   Consumables
 -   Emblems
--   Finishing Moves
+-   Executions
 -   Features
+-   Gestures
+-   Missions
+-   Mission Items
 -   Officer Challenges
 -   Operators
 -   Operator Quips
@@ -49,10 +52,11 @@ python hyde.py
 -   Stickers
 -   Vehicles
 -   Vehicle Camos
+-   Vehicle Horns
 -   Weapons
 -   Weapon Unlock Challenges
--   Weekly Warzone Challenges
 -   Weekly Multiplayer Challenges
+-   Weekly Warzone Challenges
 
 ## Disclaimer
 
