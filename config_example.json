@@ -1,0 +1,19 @@
+{
+    "ffmpegPath": "ffmpeg.exe",
+    "ModernWarfare": {
+        "enabled": true,
+        "animateImages": false,
+        "compileDatabase": false,
+        "import": {
+            "xassets": "D:/Users/Hyde/Documents/Hyde/import/xassets",
+            "images": "D:/Users/Hyde/Documents/Hyde/import/images",
+            "videos": "D:/Users/Hyde/Documents/Hyde/import/videos"
+        },
+        "export": {
+            "xassets": "D:/Users/Hyde/Documents/Hyde/export/Modern Warfare",
+            "images": "D:/Users/Hyde/Documents/Hyde/export/Modern Warfare/images",
+            "videos": "D:/Users/Hyde/Documents/Hyde/export/Modern Warfare/videos",
+            "database": "D:/Users/Hyde/Documents/Hyde/export/Modern Warfare/DB"
+        }
+    }
+}

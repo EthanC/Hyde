@@ -1,6 +1,6 @@
 # Hyde
 
-Hyde is a Call of Duty XAsset compiler that converts raw assets into digestible data. Its main purpose is to produce the data which powers the [COD Tracker Database](https://tracker.gg/warzone/db/loot).
+Hyde is a Call of Duty XAsset compiler that transforms raw assets into digestible data. Its main purpose is to produce the data which powers the [COD Tracker Database](https://tracker.gg/warzone/db/loot).
 
 Hyde is intended for use with [Jekyll](https://github.com/EthanC/Jekyll), a Call of Duty XAsset exporter. Raw XAssets are not provided, you must obtain them yourself.
 
@@ -25,7 +25,7 @@ All data is exported to the designated files in the export directory.
 python hyde.py
 ```
 
-## Supported XAssets
+## Supported Titles
 
 ### Call of Duty: Modern Warfare
 
@@ -41,8 +41,8 @@ python hyde.py
 -   Executions
 -   Features
 -   Gestures
--   Missions
 -   Mission Items
+-   Missions
 -   Officer Challenges
 -   Operators
 -   Operator Quips
@@ -50,13 +50,13 @@ python hyde.py
 -   Special Items
 -   Sprays
 -   Stickers
--   Vehicles
 -   Vehicle Camos
 -   Vehicle Horns
+-   Vehicles
 -   Weapons
 -   Weapon Unlock Challenges
--   Weekly Multiplayer Challenges
 -   Weekly Warzone Challenges
+-   Weekly Multiplayer Challenges
 
 ## Disclaimer
 

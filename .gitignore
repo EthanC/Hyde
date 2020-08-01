@@ -140,13 +140,15 @@ cython_debug/
 # Visual Studio Code
 .vscode/
 
-# Input
+# Data
 import/
-
-# Output
 export/
-tmp/
 
-# Miscellaneous
+# Configuration
+config.json
+
+# FFMPEG
 ffmpeg.exe
-challenges.py
+
+# Miscellaneous / Unused
+/challenges.py

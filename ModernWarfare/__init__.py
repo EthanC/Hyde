@@ -1,0 +1,1 @@
+from .modernwarfare import ModernWarfare
