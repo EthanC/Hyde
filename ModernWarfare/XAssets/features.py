@@ -19,6 +19,7 @@ class FeatureIDs(TypedDict):
     desc: str
     image: str
     hudImage: str
+    operatorSkinRef: str
 
 
 class Features:

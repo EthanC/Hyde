@@ -108,6 +108,11 @@ class WeaponVariants(TypedDict):
     image: str
     overrideImage: str  # Not present in all *_*_variants.csv's
     tracerColor: str  # Not present in all *_*_variants.csv's
+    dismembermentEnabled: int  # bool, not present in all *_*_variants.csv's
+    gunTableOverrideAsset: str  # Not present in all *_*_variants.csv's
+    operatorOverrideAsset: str  # Not present in all *_*_variants.csv's
+    attributeIcon: str  # Not present in all *_*_variants.csv's
+    attributeName: str  # Not present in all *_*_variants.csv's
 
 
 class WeaponProgression(TypedDict):
@@ -170,7 +175,9 @@ class AttachmentTable(TypedDict):
     modifier7: str  # Array containing a string and an int
     modifier8: str  # Array containing a string and an int (modifierEnd in luashared/csvutils.lua)
     isWeapon: int  # bool
-    # +3 columns which are not defined in luashared/csvutils.lua
+    reticlePreviewImage: str
+    dismembermentEnabled: int  # bool
+    unknown4: int  # bool, not defined in luashared/csvutils.lua
 
 
 class Weapons:
@@ -293,6 +300,7 @@ class Weapons:
                                 entry.get("license")
                             ),
                             "tracers": None,
+                            "dismemberment": None,
                             "image": None,
                         }
                     )
@@ -344,6 +352,9 @@ class Weapons:
                             None
                             if (t := entry.get("tracerColor")) is None
                             else t.capitalize()
+                        )
+                        variant["dismemberment"] = self.localize.get(
+                            entry.get("attributeName")
                         )
                         variant["image"] = entry.get("image")
 

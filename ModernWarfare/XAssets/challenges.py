@@ -61,6 +61,21 @@ class WeeklyChallenges(TypedDict):
     season: int
 
 
+class StickerBookChallenges(TypedDict):
+    """Structure of sticker_book_challenges.csv"""
+
+    id: int
+    ref: str
+    name: str
+    desc: str
+    amount: str  # Array of ints
+    loot: str  # Array of ints
+    XPReward: str  # Array of ints
+    categoryType: str
+    icon: str
+    detailDesc: str
+
+
 class OfficerChallenges:
     """Officer Challenge XAssets."""
 
@@ -264,5 +279,60 @@ class WeeklyChallengesMP:
                 challenges[-1]["rewards"].append(
                     {"id": l, "type": self.ModernWarfare.GetLootType(l)}
                 )
+
+        return challenges
+
+
+class MasteryChallenges:
+    """Mastery Challenges XAssets."""
+
+    def Compile(self: Any) -> None:
+        """Compile the Mastery Challenges XAssets."""
+
+        challenges: List[Dict[str, Any]] = []
+
+        challenges = MasteryChallenges.Table(self, challenges)
+
+        Utility.WriteFile(self, f"{self.eXAssets}/masteryChallenges.json", challenges)
+
+        log.info(f"Compiled {len(challenges):,} Mastery Challenges")
+
+    def Table(self: Any, challenges: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Compile the sticker_book_challenges.csv XAsset."""
+
+        table: List[Dict[str, Any]] = Utility.ReadCSV(
+            self, f"{self.iXAssets}/sticker_book_challenges.csv", StickerBookChallenges
+        )
+
+        if table is None:
+            return challenges
+
+        for entry in table:
+            challenges.append(
+                {
+                    "altId": entry.get("ref"),
+                    "name": self.localize.get(entry.get("name")),
+                    "description": self.localize.get(entry.get("desc")),
+                    "category": entry.get("categoryType"),
+                    "rewards": [],
+                }
+            )
+
+            amounts: List[int] = Utility.GetCSVArray(self, entry.get("amount"), int)
+            loot: List[int] = Utility.GetCSVArray(self, entry.get("loot"), int)
+            xp: List[int] = Utility.GetCSVArray(self, entry.get("XPReward"), int)
+
+            for a, l, x in zip(amounts, loot, xp):
+                challenges[-1]["rewards"].append(
+                    {
+                        "amount": a,
+                        "xp": x,
+                        "id": l,
+                        "type": self.ModernWarfare.GetLootType(l),
+                    }
+                )
+
+            if (desc := challenges[-1].get("description")) is not None:
+                challenges[-1]["description"] = desc.replace("&&1", str(amounts[-1]))
 
         return challenges

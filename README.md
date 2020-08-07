@@ -38,21 +38,26 @@ python hyde.py
 -   Charms
 -   Consumables
 -   Emblems
+-   Equipment
 -   Executions
 -   Features
 -   Gestures
+-   Killstreaks
+-   Mastery Challenges
 -   Mission Items
 -   Missions
 -   Officer Challenges
 -   Operators
--   Operator Quips
--   Operator Skins
+-   Quips
+-   Skins
 -   Special Items
+-   Splashes
 -   Sprays
 -   Stickers
 -   Vehicle Camos
 -   Vehicle Horns
 -   Vehicles
+-   Vehicle Tracks
 -   Weapons
 -   Weapon Unlock Challenges
 -   Weekly Warzone Challenges

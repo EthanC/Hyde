@@ -43,7 +43,7 @@ class DBBattlePasses:
         )
 
         # Adjust value to add Seasons, no way to dynamically set it.
-        for battlePass in passes[:4]:
+        for battlePass in passes[:5]:
             if battlePass.get("name") is None:
                 continue
 
@@ -154,6 +154,7 @@ class DBLoot:
             "stickers",
             "vehicleCamos",
             "vehicleHorns",
+            "vehicleTracks",
         ]
 
         for file in loot:
@@ -226,6 +227,8 @@ class DBLoot:
                     variant.pop("season")
                 if variant.get("tracers") is None:
                     variant.pop("tracers")
+                if variant.get("dismemberment") is None:
+                    variant.pop("dismemberment")
 
                 variant["class"] = weapon.get("class")
                 variant["baseId"] = weapon.get("id")

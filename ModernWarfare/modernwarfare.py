@@ -14,9 +14,12 @@ from .XAssets import (
     Charms,
     Consumables,
     Emblems,
+    Equipment,
     Executions,
     Features,
     Gestures,
+    Killstreaks,
+    MasteryChallenges,
     MissionItems,
     Missions,
     OfficerChallenges,
@@ -24,11 +27,13 @@ from .XAssets import (
     Quips,
     Skins,
     SpecialItems,
+    Splashes,
     Sprays,
     Stickers,
     VehicleCamos,
     VehicleHorns,
     Vehicles,
+    VehicleTracks,
     Weapons,
     WeaponUnlockChallenges,
     WeeklyChallengesBR,
@@ -164,9 +169,12 @@ class ModernWarfare:
         Charms.Compile(self)
         Consumables.Compile(self)
         Emblems.Compile(self)
+        Equipment.Compile(self)
         Executions.Compile(self)
         Features.Compile(self)
         Gestures.Compile(self)
+        Killstreaks.Compile(self)
+        MasteryChallenges.Compile(self)
         MissionItems.Compile(self)
         Missions.Compile(self)
         OfficerChallenges.Compile(self)
@@ -174,11 +182,13 @@ class ModernWarfare:
         Quips.Compile(self)
         Skins.Compile(self)
         SpecialItems.Compile(self)
+        Splashes.Compile(self)
         Sprays.Compile(self)
         Stickers.Compile(self)
         VehicleCamos.Compile(self)
         VehicleHorns.Compile(self)
         Vehicles.Compile(self)
+        VehicleTracks.Compile(self)
         Weapons.Compile(self)
         WeaponUnlockChallenges.Compile(self)
         WeeklyChallengesBR.Compile(self)

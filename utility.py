@@ -139,6 +139,18 @@ class Utility:
 
         return values
 
+    def GetStringBool(self: Any, value: str) -> Optional[bool]:
+        """Determine the proper boolean value for the given string."""
+
+        if value == "TRUE":
+            return True
+        elif value == "FALSE":
+            return False
+        elif value == "Y":
+            return True
+        elif value == "N":
+            return False
+
     def SortList(
         self: Any, array: List[Dict[str, Any]], key: str, **kwargs
     ) -> List[Dict[str, Any]]:
@@ -227,7 +239,7 @@ class Utility:
                 rows: int = height // frameHeight
 
                 if self.config.get("animateImages") is True:
-                    Path(f"{self.eImages}/temp/").mkdir()
+                    Path(f"{self.eImages}/temp/").mkdir(exist_ok=True)
 
                     i: int = 1
 
@@ -262,6 +274,6 @@ class Utility:
                         stderr=subprocess.DEVNULL,
                     )
 
-                    shutil.rmtree(f"{self.eImages}/temp/")
+                    shutil.rmtree(f"{self.eImages}/temp/", ignore_errors=True)
 
                     return True

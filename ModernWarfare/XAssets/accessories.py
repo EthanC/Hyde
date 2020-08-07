@@ -40,6 +40,10 @@ class AccessoryTable(TypedDict):
     face: str
     faceLarge: str
     faceFemale: str
+    unknown2: str  # Not defined in luashared/csvutils.lua
+    unknown3: str  # Not defined in luashared/csvutils.lua
+    unknown4: str  # Not defined in luashared/csvutils.lua
+    disablePreview: str  # int (bool)
 
 
 class Accessories:
