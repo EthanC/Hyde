@@ -6,6 +6,7 @@ from .camos import Camos
 from .challenges import (
     MasteryChallenges,
     OfficerChallenges,
+    TurboChallenges,
     WeaponUnlockChallenges,
     WeeklyChallengesBR,
     WeeklyChallengesMP,

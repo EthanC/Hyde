@@ -30,6 +30,7 @@ from .XAssets import (
     Splashes,
     Sprays,
     Stickers,
+    TurboChallenges,
     VehicleCamos,
     VehicleHorns,
     Vehicles,
@@ -185,6 +186,7 @@ class ModernWarfare:
         Splashes.Compile(self)
         Sprays.Compile(self)
         Stickers.Compile(self)
+        TurboChallenges.Compile(self)
         VehicleCamos.Compile(self)
         VehicleHorns.Compile(self)
         Vehicles.Compile(self)
@@ -233,6 +235,9 @@ class ModernWarfare:
     def GetLootType(self: Any, id: int) -> Optional[str]:
         """Get the loot type for the provided id."""
 
+        if id is None:
+            return
+
         for loot in self.lootTypes:
             start: int = loot.get("rangeStart")
             end: int = loot.get("rangeEnd")
@@ -249,6 +254,9 @@ class ModernWarfare:
         if license == 0:
             # Does not necessarily mean that the item is a part of Season 0.
             return
+        elif ((license - 1) % 1000) == 0:
+            # For instances such as the Season 4: Reloaded update.
+            license -= 1
         elif (license % 1000) != 0:
             # Seasonal licenses are multiples of 1,000.
             return

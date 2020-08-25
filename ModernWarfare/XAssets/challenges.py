@@ -76,6 +76,18 @@ class StickerBookChallenges(TypedDict):
     detailDesc: str
 
 
+class PetWatchTurboTable(TypedDict):
+    """Structure of mp/petwatchturbotable.csv"""
+
+    ref: str
+    phaseNum: int
+    phaseTime: int
+    bonusTimeMax: int
+    gameType: str
+    charmID: int
+    challengeDesc: str
+
+
 class OfficerChallenges:
     """Officer Challenge XAssets."""
 
@@ -336,3 +348,45 @@ class MasteryChallenges:
                 challenges[-1]["description"] = desc.replace("&&1", str(amounts[-1]))
 
         return challenges
+
+
+class TurboChallenges:
+    """Tomogunchi Turbo Challenges XAssets."""
+
+    def Compile(self: Any) -> None:
+        """Compile the Tomogunchi Turbo Challenges XAssets."""
+
+        challenges: List[Dict[str, Any]] = []
+
+        challenges = TurboChallenges.Table(self, challenges)
+
+        Utility.WriteFile(self, f"{self.eXAssets}/turboChallenges.json", challenges)
+
+        log.info(f"Compiled {len(challenges):,} Tomogunchi Turbo Challenges")
+
+    def Table(self: Any, challenges: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Compile the mp/petwatchturbotable.csv XAsset."""
+
+        table: List[Dict[str, Any]] = Utility.ReadCSV(
+            self, f"{self.iXAssets}/mp/petwatchturbotable.csv", PetWatchTurboTable
+        )
+
+        if table is None:
+            return challenges
+
+        for entry in table:
+            challenges.append(
+                {
+                    "altId": entry.get("ref"),
+                    "phase": entry.get("phaseNum"),
+                    "description": self.localize.get(entry.get("challengeDesc")),
+                    "phaseTime": entry.get("phaseTime"),
+                    "maxBonusTime": entry.get("bonusTimeMax"),
+                    "charmAltId": None
+                    if (cid := entry.get("charmID")) is None
+                    else f"cos_{cid}",
+                }
+            )
+
+        return challenges
+

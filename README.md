@@ -54,6 +54,7 @@ python hyde.py
 -   Splashes
 -   Sprays
 -   Stickers
+-   Turbo Challenges
 -   Vehicle Camos
 -   Vehicle Horns
 -   Vehicles

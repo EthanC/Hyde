@@ -67,6 +67,9 @@ class Utility:
     ) -> None:
         """Write the contents of the specified file."""
 
+        if Path(dirPath := (path.rsplit("/", 1)[0])).exists() is False:
+            Path(dirPath).mkdir(parents=True, exist_ok=True)
+
         try:
             with open(path, "w+", encoding="utf-8") as file:
                 if path.rsplit(".")[1] == "json":
