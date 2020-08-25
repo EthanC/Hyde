@@ -39,6 +39,7 @@ class OperatorsTable(TypedDict):
     thumbprint: str
     bioImage: str
     fullName: str
+    hiddenWhenLocked: int  # bool
 
 
 class FactionTable(TypedDict):
@@ -146,6 +147,7 @@ class Operators:
                     "launchOperator": None,
                     "image": None,
                     "video": None,
+                    "hidden": None,
                     "billets": [],
                 }
             )
@@ -180,6 +182,7 @@ class Operators:
                     if (v := entry.get("introVideo")).endswith("_placeholder")
                     else v
                 )
+                operator["hidden"] = bool(entry.get("hiddenWhenLocked"))
                 operator["billets"] = [
                     {
                         "label": self.localize.get("LUA_MENU/CITIZENSHIP"),

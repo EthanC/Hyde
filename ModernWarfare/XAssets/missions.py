@@ -38,12 +38,12 @@ class IntelChallenges(TypedDict):
     inGame: int  # bool
     event: str
     modelPartName: str
-    originX: int
-    originY: int
-    originZ: int
-    anglesX: int
-    anglesY: int
-    anglesZ: int
+    originX: float
+    originY: float
+    originZ: float
+    anglesX: float
+    anglesY: float
+    anglesZ: float
     image: str
 
 

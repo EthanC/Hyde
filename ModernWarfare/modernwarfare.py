@@ -111,6 +111,7 @@ class AttachmentCategoryTable(TypedDict):
     defaultLineOffsetZ: int
     enableBigGunPreviewCamera: int  # bool
     enableSmallGunPreviewCamera: int  # bool
+    enableBigShotgunPreviewCamera: int  # bool
 
 
 class CamoCategoryTable(TypedDict):
@@ -299,3 +300,27 @@ class ModernWarfare:
         for category in self.camoCategories:
             if category.get("ref") == reference:
                 return self.localize.get(category.get("name"))
+
+    def GetWeaponAttribute(self: Any, reference: str) -> Optional[str]:
+        """
+        Get the name of the specified weapon attribute.
+        
+        Defined in ui/utils/weaponutils.lua
+        """
+
+        attributes: Dict[str, str] = {
+            "red": "WEAPON/TRACER_RED",
+            "blue": "WEAPON/TRACER_BLUE",
+            "pink": "WEAPON/TRACER_PINK",
+            "green": "WEAPON/TRACER_GREEN",
+            "purple": "WEAPON/TRACER_PURPLE",
+            "freedom": "WEAPON/TRACER_FREEDOM",
+            "shadow": "WEAPON/TRACER_SHADOW",
+            "gold": "WEAPON/TRACER_GOLD",
+            "morte": "WEAPON/TRACER_MORTE",
+            "standardDis": "WEAPON/DISMEMBERMENT",
+            "cryoDis": "WEAPON/CRYO_DISMEMBERMENT",
+            "goldDis": "WEAPON/DISMEMBERMENT_GOLD",
+        }
+
+        return self.localize.get(attributes.get(reference))

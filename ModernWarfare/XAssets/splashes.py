@@ -38,6 +38,8 @@ class SplashTable(TypedDict):
     unknown8: str  # Not defined in luashared/csvutils.lua
     unknown9: str  # Not defined in luashared/csvutils.lua
     unknown10: str  # Not defined in luashared/csvutils.lua
+    unknown11: str  # Not defined in luashared/csvutils.lua
+    animOverride: str
 
 
 class Splashes:

@@ -107,6 +107,8 @@ class DBBundles:
                 bundle.pop("description")
             if bundle.get("flavor") is None:
                 bundle.pop("flavor")
+            if bundle.get("feature") is None:
+                bundle.pop("feature")
             if bundle.get("season") is None:
                 bundle.pop("season")
 
@@ -289,6 +291,7 @@ class DBOperators:
             operator.pop("branchIcon")
             operator.pop("thumbprint")
             operator.pop("video")
+            operator.pop("hidden")
             operator.pop("billets")
 
             if operator.get("season") is None:
@@ -440,7 +443,6 @@ class DBWeapons:
                 if Utility.FileExists(self, f"{self.iImages}/{i}.png") is False:
                     continue
 
-                attachment.pop("id")
                 attachment.pop("altId")
                 attachment.pop("unlock")
 

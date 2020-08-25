@@ -25,7 +25,7 @@ class StatsTable(TypedDict):
     gunTableOverrideAsset: str
     operatorOverrideAsset: str
     attachVariantCategoryBlacklist: str
-    unknown2: str  # Not defined in luashared/csvutils.lua
+    hiddenWhenLocked: int  # bool
     unknown3: str  # Not defined in luashared/csvutils.lua
     unknown4: str  # Not defined in luashared/csvutils.lua
     unknown5: str  # Not defined in luashared/csvutils.lua
@@ -108,11 +108,9 @@ class WeaponVariants(TypedDict):
     image: str
     overrideImage: str  # Not present in all *_*_variants.csv's
     tracerColor: str  # Not present in all *_*_variants.csv's
-    dismembermentEnabled: int  # bool, not present in all *_*_variants.csv's
+    dismembermentEnabled: str  # Not present in all *_*_variants.csv's
     gunTableOverrideAsset: str  # Not present in all *_*_variants.csv's
     operatorOverrideAsset: str  # Not present in all *_*_variants.csv's
-    attributeIcon: str  # Not present in all *_*_variants.csv's
-    attributeName: str  # Not present in all *_*_variants.csv's
 
 
 class WeaponProgression(TypedDict):
@@ -176,7 +174,7 @@ class AttachmentTable(TypedDict):
     modifier8: str  # Array containing a string and an int (modifierEnd in luashared/csvutils.lua)
     isWeapon: int  # bool
     reticlePreviewImage: str
-    dismembermentEnabled: int  # bool
+    dismembermentEnabled: str
     unknown4: int  # bool, not defined in luashared/csvutils.lua
 
 
@@ -348,13 +346,13 @@ class Weapons:
                         variant["flavor"] = self.localize.get(
                             f"WEAPON_FLAVOR/{flavor.upper()}_FLAVOR"
                         )
-                        variant["tracers"] = (
-                            None
-                            if (t := entry.get("tracerColor")) is None
-                            else t.capitalize()
+                        variant["tracers"] = self.ModernWarfare.GetWeaponAttribute(
+                            entry.get("tracerColor")
                         )
-                        variant["dismemberment"] = self.localize.get(
-                            entry.get("attributeName")
+                        variant[
+                            "dismemberment"
+                        ] = self.ModernWarfare.GetWeaponAttribute(
+                            entry.get("dismembermentEnabled")
                         )
                         variant["image"] = entry.get("image")
 

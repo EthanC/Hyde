@@ -47,7 +47,7 @@ class BundleIDs(TypedDict):
     smartID: int
     smartCost: int
     isBattlePassBundle: int  # bool
-    purchaseEnd: int
+    purchaseEnd: str
     dlcRef: str
     oldBundleOwnershipID: int
     isCollection: int  # bool
@@ -58,6 +58,7 @@ class BundleIDs(TypedDict):
     collectionName: str
     collectionImage: str
     collectionPreviewImage: str
+    featureText: str
 
 
 class Bundles:
@@ -93,6 +94,7 @@ class Bundles:
                         "name": self.localize.get(entry.get("name")),
                         "description": self.localize.get(entry.get("description")),
                         "flavor": self.localize.get(entry.get("flavorText")),
+                        "feature": self.localize.get(entry.get("featureText")),
                         "type": self.localize.get(entry.get("bundleType")),
                         "season": self.ModernWarfare.GetLootSeason(
                             entry.get("license")
