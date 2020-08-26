@@ -111,6 +111,8 @@ class DBBundles:
                 bundle.pop("feature")
             if bundle.get("season") is None:
                 bundle.pop("season")
+            if bundle.get("name") == bundle.get("flavor"):
+                bundle.pop("flavor")
 
             bundle["slug"] = Utility.Sluggify(self, bundle.get("name"))
 
@@ -290,6 +292,7 @@ class DBOperators:
             operator.pop("rarity")
             operator.pop("branchIcon")
             operator.pop("thumbprint")
+            operator.pop("launchOperator")
             operator.pop("video")
             operator.pop("hidden")
             operator.pop("billets")

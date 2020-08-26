@@ -242,7 +242,9 @@ class Utility:
                 rows: int = height // frameHeight
 
                 if self.config.get("animateImages") is True:
-                    Path(f"{self.eImages}/temp/").mkdir(exist_ok=True)
+                    Path(f"{self.eImages}/temp/").mkdir(parents=True, exist_ok=True)
+                    Path(f"{self.eImages}").mkdir(parents=True, exist_ok=True)
+                    Path(f"{self.eVideos}").mkdir(parents=True, exist_ok=True)
 
                     i: int = 1
 
