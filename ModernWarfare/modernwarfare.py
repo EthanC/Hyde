@@ -20,6 +20,7 @@ from .XAssets import (
     GameTypes,
     Gestures,
     Killstreaks,
+    Maps,
     MasteryChallenges,
     MissionItems,
     Missions,
@@ -178,6 +179,7 @@ class ModernWarfare:
         GameTypes.Compile(self)
         Gestures.Compile(self)
         Killstreaks.Compile(self)
+        Maps.Compile(self)
         MasteryChallenges.Compile(self)
         MissionItems.Compile(self)
         Missions.Compile(self)

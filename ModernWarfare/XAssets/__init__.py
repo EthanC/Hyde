@@ -20,6 +20,7 @@ from .features import Features
 from .gameTypes import GameTypes
 from .gestures import Gestures
 from .killstreaks import Killstreaks
+from .maps import Maps
 from .missions import MissionItems, Missions
 from .operators import Operators
 from .quips import Quips

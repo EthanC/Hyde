@@ -44,6 +44,7 @@ python hyde.py
 -   Game Types
 -   Gestures
 -   Killstreaks
+-   Maps
 -   Mastery Challenges
 -   Mission Items
 -   Missions
