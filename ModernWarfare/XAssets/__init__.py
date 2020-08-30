@@ -17,6 +17,7 @@ from .emblems import Emblems
 from .equipment import Equipment
 from .executions import Executions
 from .features import Features
+from .gameTypes import GameTypes
 from .gestures import Gestures
 from .killstreaks import Killstreaks
 from .missions import MissionItems, Missions

@@ -41,6 +41,7 @@ python hyde.py
 -   Equipment
 -   Executions
 -   Features
+-   Game Types
 -   Gestures
 -   Killstreaks
 -   Mastery Challenges

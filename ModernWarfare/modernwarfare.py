@@ -17,6 +17,7 @@ from .XAssets import (
     Equipment,
     Executions,
     Features,
+    GameTypes,
     Gestures,
     Killstreaks,
     MasteryChallenges,
@@ -174,6 +175,7 @@ class ModernWarfare:
         Equipment.Compile(self)
         Executions.Compile(self)
         Features.Compile(self)
+        GameTypes.Compile(self)
         Gestures.Compile(self)
         Killstreaks.Compile(self)
         MasteryChallenges.Compile(self)
@@ -324,3 +326,23 @@ class ModernWarfare:
         }
 
         return self.localize.get(attributes.get(reference))
+
+    def GetGameTypeCategory(self: Any, reference: str) -> Optional[str]:
+        """
+        Get the name of the specified game type category.
+        
+        Defined in ui/utils/mplobbyutils.lua and ui/frontend/mp/gamemodes.lua
+        """
+
+        categories: Dict[str, str] = {
+            "PrivateTournament": "LUA_MENU/TOURNAMENT",
+            "Plunder": "LUA_MENU/GAMEMODE_PLUNDER",
+            "BattleRoyale": "LUA_MENU/GAMEMODE_BATTLE_ROYALE",
+            "WarzoneAlternate": "LUA_MENU/GAMEMODE_WARZONE_ALTERNATE",
+            "MyModes": "LUA_MENU/MY_MODES",
+            "Cwl": "LUA_MENU/CWL_MODES",
+            "Standard": "LUA_MENU/STANDARD_MODES",
+            "Alternate": "LUA_MENU/ALTERNATE_MODES",
+        }
+
+        return self.localize.get(categories.get(reference))
