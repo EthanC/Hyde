@@ -34,6 +34,12 @@ class GameTypesTable(TypedDict):
     CDLImage: str
     CDLName: str
     privateRecipe: str
+    privateMap: str
+    privateExclusiveMode: str
+    privatePlayerCount: int
+    privateSquadSize: int
+    privateSubAlternative: int
+    wzPrivateFilterBit: int
 
 
 class GameTypes:

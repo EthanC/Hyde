@@ -88,6 +88,26 @@ class PetWatchTurboTable(TypedDict):
     challengeDesc: str
 
 
+class MiscChallenges(TypedDict):
+    """Structure of misc_challenges.csv"""
+
+    id: int
+    ref: str
+    name: str
+    desc: str
+    amount: int
+    xp: int
+    loot: int
+    categoryType: str
+    icon: str
+    detailDesc: str
+    conversionType: str
+    hideSplash: int  # bool
+    hideAARLoot: int  # bool
+    showAARPopup: int  # bool
+    sound: str
+
+
 class OfficerChallenges:
     """Officer Challenge XAssets."""
 
@@ -390,3 +410,51 @@ class TurboChallenges:
 
         return challenges
 
+
+class MiscellaneousChallenges:
+    """Miscellaneous Challenges XAssets."""
+
+    def Compile(self: Any) -> None:
+        """Compile the Miscellaneous Challenges XAssets."""
+
+        challenges: List[Dict[str, Any]] = []
+
+        challenges = MiscellaneousChallenges.Table(self, challenges)
+
+        Utility.WriteFile(self, f"{self.eXAssets}/miscChallenges.json", challenges)
+
+        log.info(f"Compiled {len(challenges):,} Miscellaneous Challenges")
+
+    def Table(self: Any, challenges: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Compile the misc_challenges.csv XAsset."""
+
+        table: List[Dict[str, Any]] = Utility.ReadCSV(
+            self, f"{self.iXAssets}/misc_challenges.csv", MiscChallenges
+        )
+
+        if table is None:
+            return challenges
+
+        for entry in table:
+            if (d := self.localize.get(entry.get("desc"))) is not None:
+                desc: Optional[str] = d
+            elif (d := self.localize.get(entry.get("detailDesc"))) is not None:
+                desc = d
+            else:
+                desc = None
+
+            challenges.append(
+                {
+                    "altId": entry.get("ref"),
+                    "name": self.localize.get(entry.get("name")),
+                    "description": desc,
+                    "rewards": [
+                        {
+                            "id": entry.get("loot"),
+                            "type": self.ModernWarfare.GetLootType(entry.get("loot")),
+                        }
+                    ],
+                }
+            )
+
+        return challenges

@@ -31,7 +31,9 @@ class VehicleCamosTable(TypedDict):
     showcaseImage: str
     hideInUI: int  # bool
     flavorText: str
-    unknown1: str  # Not defined in luashared/csvutils.lua
+    trailVFX: str
+    specialAttribute: str
+    unlockText: str
 
 
 class VehicleCamos:
@@ -69,6 +71,8 @@ class VehicleCamos:
                     "type": self.ModernWarfare.GetLootType(entry.get("id")),
                     "rarity": self.ModernWarfare.GetLootRarity(entry.get("rarity")),
                     "season": self.ModernWarfare.GetLootSeason(entry.get("license")),
+                    "unlock": None,
+                    "attribute": None,
                     "hidden": None,
                     "image": None,
                     "background": "ui_loot_bg_vehicle",
@@ -94,6 +98,10 @@ class VehicleCamos:
 
                 camo["name"] = self.localize.get(entry.get("name"))
                 camo["flavor"] = self.localize.get(entry.get("flavorText"))
+                camo["unlock"] = self.localize.get(entry.get("unlockText"))
+                camo["attribute"] = self.ModernWarfare.GetAttribute(
+                    entry.get("specialAttribute")
+                )
                 camo["hidden"] = bool(entry.get("hideInUI"))
                 camo["image"] = (
                     None

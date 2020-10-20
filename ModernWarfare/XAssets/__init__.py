@@ -5,6 +5,7 @@ from .callingCards import CallingCards
 from .camos import Camos
 from .challenges import (
     MasteryChallenges,
+    MiscellaneousChallenges,
     OfficerChallenges,
     TurboChallenges,
     WeaponUnlockChallenges,
@@ -19,6 +20,7 @@ from .executions import Executions
 from .features import Features
 from .gameTypes import GameTypes
 from .gestures import Gestures
+from .itemSources import ItemSources
 from .killstreaks import Killstreaks
 from .maps import Maps
 from .missions import MissionItems, Missions

@@ -346,12 +346,10 @@ class Weapons:
                         variant["flavor"] = self.localize.get(
                             f"WEAPON_FLAVOR/{flavor.upper()}_FLAVOR"
                         )
-                        variant["tracers"] = self.ModernWarfare.GetWeaponAttribute(
+                        variant["tracers"] = self.ModernWarfare.GetAttribute(
                             entry.get("tracerColor")
                         )
-                        variant[
-                            "dismemberment"
-                        ] = self.ModernWarfare.GetWeaponAttribute(
+                        variant["dismemberment"] = self.ModernWarfare.GetAttribute(
                             entry.get("dismembermentEnabled")
                         )
                         variant["image"] = entry.get("image")

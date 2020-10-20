@@ -10,7 +10,7 @@ Hyde is intended for use with [Jekyll](https://github.com/EthanC/Jekyll), a Call
 
 ## Requirements
 
--   [Python 3.8](https://www.python.org/downloads/)
+-   [Python 3.9](https://www.python.org/downloads/)
 -   [coloredlogs](https://pypi.org/project/coloredlogs/)
 -   [Pillow](https://pillow.readthedocs.io/en/stable/installation.html)
 -   [FFmpeg](http://ffmpeg.org/download.html)
@@ -43,9 +43,11 @@ python hyde.py
 -   Features
 -   Game Types
 -   Gestures
+-   Item Sources
 -   Killstreaks
 -   Maps
 -   Mastery Challenges
+-   Miscellaneous Challenges
 -   Mission Items
 -   Missions
 -   Officer Challenges

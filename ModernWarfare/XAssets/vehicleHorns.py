@@ -39,6 +39,7 @@ class VehicleHornsTable(TypedDict):
     tacRoverAliasUI: str
     lootImage: str
     hideInUI: int  # bool
+    unlockText: str
 
 
 class VehicleHorns:
@@ -76,6 +77,7 @@ class VehicleHorns:
                     "type": self.ModernWarfare.GetLootType(entry.get("id")),
                     "rarity": self.ModernWarfare.GetLootRarity(entry.get("rarity")),
                     "season": self.ModernWarfare.GetLootSeason(entry.get("license")),
+                    "unlock": None,
                     "hidden": None,
                     "image": "ui_vehicle_horn",
                     "background": "ui_loot_bg_vehicle_horn",
@@ -101,6 +103,7 @@ class VehicleHorns:
 
                 horn["name"] = self.localize.get(entry.get("name"))
                 horn["flavor"] = self.localize.get(entry.get("flavorText"))
+                horn["unlock"] = self.localize.get(entry.get("unlockText"))
                 horn["hidden"] = bool(entry.get("hideInUI"))
 
         return horns

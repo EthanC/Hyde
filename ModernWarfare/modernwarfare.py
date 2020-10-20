@@ -19,9 +19,11 @@ from .XAssets import (
     Features,
     GameTypes,
     Gestures,
+    ItemSources,
     Killstreaks,
     Maps,
     MasteryChallenges,
+    MiscellaneousChallenges,
     MissionItems,
     Missions,
     OfficerChallenges,
@@ -178,9 +180,11 @@ class ModernWarfare:
         Features.Compile(self)
         GameTypes.Compile(self)
         Gestures.Compile(self)
+        ItemSources.Compile(self)
         Killstreaks.Compile(self)
         Maps.Compile(self)
         MasteryChallenges.Compile(self)
+        MiscellaneousChallenges.Compile(self)
         MissionItems.Compile(self)
         Missions.Compile(self)
         OfficerChallenges.Compile(self)
@@ -305,11 +309,11 @@ class ModernWarfare:
             if category.get("ref") == reference:
                 return self.localize.get(category.get("name"))
 
-    def GetWeaponAttribute(self: Any, reference: str) -> Optional[str]:
+    def GetAttribute(self: Any, reference: str) -> Optional[str]:
         """
-        Get the name of the specified weapon attribute.
-        
-        Defined in ui/utils/weaponutils.lua
+        Get the name of the specified attribute.
+
+        Defined in ui/utils/weaponutils.lua and ui/utils/vehicleutils.lua
         """
 
         attributes: Dict[str, str] = {
@@ -322,9 +326,21 @@ class ModernWarfare:
             "shadow": "WEAPON/TRACER_SHADOW",
             "gold": "WEAPON/TRACER_GOLD",
             "morte": "WEAPON/TRACER_MORTE",
+            "tesla": "WEAPON/TRACER_TESLA",
+            "sixteenBit": "WEAPON/TRACER_16BIT",
+            "dark": "WEAPON/TRACER_DARK",
+            "light": "WEAPON/TRACER_LIGHT",
+            "orange": "WEAPON/TRACER_ORANGE",
+            "yellow": "WEAPON/TRACER_YELLOW",
+            "soul": "WEAPON/TRACER_SOUL",
             "standardDis": "WEAPON/DISMEMBERMENT",
             "cryoDis": "WEAPON/CRYO_DISMEMBERMENT",
             "goldDis": "WEAPON/DISMEMBERMENT_GOLD",
+            "tailLightTracerRed": "VEHICLES/ATTRIBUTE_TAIL_LIGHT_TRACER_RED",
+            "flightTrailStandard": "VEHICLES/ATTRIBUTE_FLIGHT_TRAIL_STANDARD",
+            "flightTrailShadow": "VEHICLES/ATTRIBUTE_FLIGHT_TRAIL_SHADOW",
+            "tireTrailFlame": "VEHICLES/ATTRIBUTE_TIRE_TRAIL_FLAME",
+            "smoke": "VEHICLES/ATTRIBUTE_SMOKE",
         }
 
         return self.localize.get(attributes.get(reference))
@@ -332,7 +348,7 @@ class ModernWarfare:
     def GetGameTypeCategory(self: Any, reference: str) -> Optional[str]:
         """
         Get the name of the specified game type category.
-        
+
         Defined in ui/utils/mplobbyutils.lua and ui/frontend/mp/gamemodes.lua
         """
 

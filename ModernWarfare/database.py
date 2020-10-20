@@ -42,8 +42,7 @@ class DBBattlePasses:
             self, f"{self.eXAssets}/battlePasses.json"
         )
 
-        # Adjust value to add Seasons, no way to dynamically set it.
-        for battlePass in passes[:5]:
+        for battlePass in passes:
             if battlePass.get("name") is None:
                 continue
 
@@ -59,7 +58,10 @@ class DBBattlePasses:
             self.count += 1
 
         Utility.WriteFile(
-            self, f"{self.eDatabase}/battlePasses.json", dbPasses, compress=True,
+            self,
+            f"{self.eDatabase}/battlePasses.json",
+            dbPasses,
+            compress=True,
         )
         Utility.WriteFile(self, f"{self.eDatabase}/_battlePasses.json", dbPasses)
 
@@ -185,6 +187,7 @@ class DBLoot:
                 item.pop("operatorAltId", None)
                 item.pop("pet", None)
                 item.pop("video", None)
+                item.pop("unlock", None)
 
                 if item.get("description") is None:
                     item.pop("description", None)
@@ -192,6 +195,8 @@ class DBLoot:
                     item.pop("flavor", None)
                 if item.get("season") is None:
                     item.pop("season", None)
+                if item.get("attribute") is None:
+                    item.pop("attribute", None)
 
                 if (iType := item.get("type")) == "Calling Card":
                     item["animated"] = Utility.AnimateSprite(
@@ -280,6 +285,8 @@ class DBOperators:
             elif operator.get("name") is None:
                 continue
             elif (i := operator.get("image")) is None:
+                continue
+            elif operator.get("name") == "Griggs":  # Temporary
                 continue
 
             self.dbImages.append(i)

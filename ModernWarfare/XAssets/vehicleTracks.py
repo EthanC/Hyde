@@ -32,6 +32,8 @@ class VehicleTracksTable(TypedDict):
     inGameMusicState: str
     battlePassAlias: str
     battlePassName: str
+    unlockText: str
+    packRef: str
 
 
 class VehicleTracks:
@@ -68,6 +70,7 @@ class VehicleTracks:
                     "type": self.ModernWarfare.GetLootType(entry.get("id")),
                     "rarity": self.ModernWarfare.GetLootRarity(entry.get("rarity")),
                     "season": self.ModernWarfare.GetLootSeason(entry.get("license")),
+                    "unlock": None,
                     "hidden": None,
                     "image": "ui_vehicle_battle_track",
                     "background": "ui_loot_bg_vehicle_horn",
@@ -92,6 +95,7 @@ class VehicleTracks:
                     continue
 
                 track["name"] = self.localize.get(entry.get("name"))
+                track["unlock"] = self.localize.get(entry.get("unlockText"))
                 track["hidden"] = bool(entry.get("hideInUI"))
 
         return tracks
