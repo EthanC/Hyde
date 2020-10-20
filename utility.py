@@ -282,3 +282,5 @@ class Utility:
                     shutil.rmtree(f"{self.eImages}/temp/", ignore_errors=True)
 
                     return True
+                else:
+                    return True
