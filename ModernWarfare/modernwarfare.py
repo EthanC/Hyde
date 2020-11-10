@@ -341,6 +341,11 @@ class ModernWarfare:
             "flightTrailShadow": "VEHICLES/ATTRIBUTE_FLIGHT_TRAIL_SHADOW",
             "tireTrailFlame": "VEHICLES/ATTRIBUTE_TIRE_TRAIL_FLAME",
             "smoke": "VEHICLES/ATTRIBUTE_SMOKE",
+            "tireTrailTesla": "VEHICLES/ATTRIBUTE_TIRE_TRAIL_TESLA",
+            "crimsonGold": "WEAPON/TRACER_CRIMSON_GOLD",
+            "emerald": "WEAPON/TRACER_EMERALD",
+            "amethyst": "WEAPON/TRACER_AMETHYST",
+            "cherryBlossom": "WEAPON/TRACER_CHERRY_BLOSSOM",
         }
 
         return self.localize.get(attributes.get(reference))

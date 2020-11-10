@@ -179,7 +179,8 @@ class Operators:
                 operator["image"] = entry.get("icon")
                 operator["video"] = (
                     None
-                    if (v := entry.get("introVideo")).endswith("_placeholder")
+                    if ((v := entry.get("introVideo")) is None)
+                    or (v.endswith("_placeholder"))
                     else v
                 )
                 operator["hidden"] = bool(entry.get("hiddenWhenLocked"))

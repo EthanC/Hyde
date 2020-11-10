@@ -40,7 +40,8 @@ class EquipmentTable(TypedDict):
     progressionImage: str
     survivalCost: int
     disableAutoUnlockPrivate: int  # bool
-    unknown5: str  # Not defined in luashared/csvutils.lua
+    unknown5: str # Not defined in luashared/csvutils.lua
+    showInSurvival: int  # bool
 
 
 class Equipment:

@@ -34,6 +34,7 @@ class IntelChallenges(TypedDict):
     """Structure of mp/intel_challenges.csv"""
 
     ref: str
+    masterRef: str
     seasonWeek: int
     inGame: int  # bool
     event: str
@@ -45,6 +46,7 @@ class IntelChallenges(TypedDict):
     anglesY: float
     anglesZ: float
     image: str
+    collectAll: int  # bool
 
 
 class MissionIDs(TypedDict):
@@ -125,7 +127,10 @@ class Missions:
 
             if (loot := entry.get("loot")) is not None:
                 missions[-1]["objectives"][-1]["rewards"].append(
-                    {"id": loot, "type": self.ModernWarfare.GetLootType(loot),}
+                    {
+                        "id": loot,
+                        "type": self.ModernWarfare.GetLootType(loot),
+                    }
                 )
 
             if (desc := missions[-1]["objectives"][-1].get("description")) is not None:

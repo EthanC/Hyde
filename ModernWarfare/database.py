@@ -286,8 +286,6 @@ class DBOperators:
                 continue
             elif (i := operator.get("image")) is None:
                 continue
-            elif operator.get("name") == "Griggs":  # Temporary
-                continue
 
             self.dbImages.append(i)
 

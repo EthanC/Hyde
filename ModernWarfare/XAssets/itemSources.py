@@ -13,7 +13,10 @@ class ItemSourceTable(TypedDict):
     refType: str
     refName: str
     gameSourceID: str
-    equippableBy: str
+    equippableIW8MP: int  # bool
+    equippableWZ: int  # bool
+    equippableT9: int  # bool
+    equippableS4: int  # bool
 
 
 class ItemSources:
@@ -47,9 +50,10 @@ class ItemSources:
                     "altId": entry.get("refName"),
                     "type": self.ModernWarfare.GetLootType(entry.get("marketPlaceID")),
                     "source": entry.get("gameSourceID"),
-                    "equippable": None
-                    if (e := entry.get("equippableBy")) is None
-                    else e.split(" "),
+                    "iw8mp": bool(entry.get("equippableIW8MP")),
+                    "wz": bool(entry.get("equippableWZ")),
+                    "t9": bool(entry.get("equippableT9")),
+                    "s4": bool(entry.get("equippableS4")),
                 }
             )
 
