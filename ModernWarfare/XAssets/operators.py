@@ -220,16 +220,18 @@ class Operators:
 
                 operator["branch"] = self.localize.get(entry.get("name"))
 
-                # This is a (temporary?) workaround as Infinity Ward does
-                # not distinguish the two Mil-Sim branches in the factiontable,
-                # thus resulting in each incorrectly belonging to Coalition.
-                # Ideally, we would use superFactionName.
-                if (faction := operator.get("faction")) == 0:
-                    operator["faction"] = self.localize.get("LUA_MENU/THE_WEST")
-                elif faction == 1:
-                    operator["faction"] = self.localize.get("LUA_MENU/THE_EAST")
+                if operator.get("altId").startswith("default_"):
+                    # This is a (temporary?) workaround as Infinity Ward does
+                    # not distinguish the two Mil-Sim branches in the factiontable,
+                    # thus resulting in each incorrectly belonging to Coalition.
+                    if (faction := operator.get("faction")) == 0:
+                        operator["faction"] = self.localize.get("LUA_MENU/THE_WEST")
+                    elif faction == 1:
+                        operator["faction"] = self.localize.get("LUA_MENU/THE_EAST")
+                    else:
+                        operator["faction"] = None
                 else:
-                    operator["faction"] = None
+                    operator["faction"] = self.localize.get(entry.get("superFactionName"))
 
         return operators
 
